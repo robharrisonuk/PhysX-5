@@ -46,6 +46,7 @@ Sc::ArticulationSpatialTendonSim::ArticulationSpatialTendonSim(ArticulationSpati
 	mLLTendon.mDamping = tendon.mDamping;
 	mLLTendon.mOffset = tendon.mOffset;
 	mLLTendon.mLimitStiffness = tendon.mLimitStiffness;
+	mLLTendon.mTensionOnly = tendon.mTensionOnly;
 }
 
 
@@ -54,6 +55,18 @@ Sc::ArticulationSpatialTendonSim::~ArticulationSpatialTendonSim()
 	mTendonCore.setSim(NULL);
 }
 
+void Sc::ArticulationSpatialTendonSim::setTensionOnly(bool tensionOnly)
+{
+	mLLTendon.mTensionOnly = tensionOnly;
+
+	Dy::FeatherstoneArticulation* llArticulation = static_cast<Dy::FeatherstoneArticulation*>(mArtiSim->getLowLevelArticulation());
+	llArticulation->setGpuDirtyFlag(Dy::ArticulationDirtyFlag::eDIRTY_SPATIAL_TENDON);
+}
+
+bool Sc::ArticulationSpatialTendonSim::getTensionOnly() const
+{
+	return mLLTendon.mTensionOnly;
+}
 
 void Sc::ArticulationSpatialTendonSim::setStiffness(const PxReal stiffness)
 {

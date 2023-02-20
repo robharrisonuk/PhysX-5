@@ -69,13 +69,14 @@ namespace Dy
 	{
 	public:
 
-		ArticulationTendon() : mStiffness(0.f), mDamping(0.f), mOffset(0.f), mLimitStiffness(0.f)
+		ArticulationTendon() : mStiffness(0.f), mDamping(0.f), mOffset(0.f), mLimitStiffness(0.f), mTensionOnly(false)
 		{ 
 		}
 		PxReal								mStiffness;
 		PxReal								mDamping;
 		PxReal								mOffset;
 		PxReal								mLimitStiffness;
+		bool								mTensionOnly;
 	};
 
 	class ArticulationSpatialTendon : public ArticulationTendon

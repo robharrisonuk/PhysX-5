@@ -53,6 +53,9 @@ namespace Sc
 
 		virtual ~ArticulationSpatialTendonSim();
 
+		void							setTensionOnly(bool tensionOnly);
+		bool							getTensionOnly() const;
+
 		void							setStiffness(const PxReal stiffness);
 		PxReal							getStiffness() const;
 

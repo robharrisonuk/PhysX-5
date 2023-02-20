@@ -287,6 +287,25 @@ namespace physx
 	{
 	public:
 		/**
+		\brief Sets the tenson-only setting of the tendon. If enabled, the tendon will only apply a force when under tension
+
+		\param[in] tensionOnly tension only setting.
+		<b>Default:</b> false
+
+		@see getTensionOnly()
+		*/
+		virtual		void							setTensionOnly(bool tensionOnly) = 0;
+
+		/**
+		\brief Gets the tension only setting of the tendon.
+
+		\return tension only setting.
+
+		@see setTensionOnly()
+		*/
+		virtual		bool							getTensionOnly() const = 0;
+
+		/**
 		\brief Sets the spring stiffness term acting on the tendon length.
 
 		\param[in] stiffness The spring stiffness.

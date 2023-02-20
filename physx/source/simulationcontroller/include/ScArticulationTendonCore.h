@@ -49,7 +49,7 @@ namespace Sc
 		static			void								getBinaryMetaData(PxOutputStream& stream);
 //~PX_SERIALIZATION
 
-		ArticulationTendonCore() : mStiffness(0.f), mDamping(0.f), mOffset(0.f), mLimitStiffness(0.f)
+		ArticulationTendonCore() : mStiffness(0.f), mDamping(0.f), mOffset(0.f), mLimitStiffness(0.f), mTensionOnly(false)
 		{
 
 		}
@@ -57,6 +57,7 @@ namespace Sc
 		PxReal								mDamping;
 		PxReal								mOffset;
 		PxReal								mLimitStiffness;
+		bool								mTensionOnly;
 	};
 
 	class ArticulationSpatialTendonCore : public ArticulationTendonCore
@@ -71,6 +72,9 @@ namespace Sc
 
 		ArticulationSpatialTendonCore() : ArticulationTendonCore() { mSim = NULL; }
 		~ArticulationSpatialTendonCore() {}
+
+		void							setTensionOnly(bool tensionOnly);
+		bool							getTensionOnly() const;
 
 		void							setStiffness(const PxReal stiffness);
 		PxReal							getStiffness() const;

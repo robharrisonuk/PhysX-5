@@ -173,6 +173,9 @@ public:
 	virtual		PxU32							getAttachments(PxArticulationAttachment** userBuffer, PxU32 bufferSize, PxU32 startIndex) const;
 	PxU32										getNbAttachments() const;
 
+	virtual		void							setTensionOnly(bool tensionOnly);
+	virtual		bool							getTensionOnly() const;
+
 	virtual		void							setStiffness(const PxReal stiffness);
 	virtual		PxReal							getStiffness() const;
 
@@ -278,6 +281,9 @@ public:
 	NpArticulationTendonJoint*					getTendonJoint(const PxU32 index);
 	virtual		PxU32							getTendonJoints(PxArticulationTendonJoint** userBuffer, PxU32 bufferSize, PxU32 startIndex) const;
 	virtual		PxU32							getNbTendonJoints(void) const;
+
+	virtual		void							setTensionOnly(bool tensionOnly);
+	virtual		bool							getTensionOnly() const;
 
 	virtual		void							setStiffness(const PxReal stiffness);
 	virtual		PxReal							getStiffness() const;

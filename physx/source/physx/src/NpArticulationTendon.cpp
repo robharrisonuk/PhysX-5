@@ -328,6 +328,20 @@ PxU32 NpArticulationSpatialTendon::getAttachments(PxArticulationAttachment** use
 	return Cm::getArrayOfPointers(userBuffer, bufferSize, startIndex, mAttachments.begin(), mAttachments.size());
 }
 
+bool NpArticulationSpatialTendon::getTensionOnly() const
+{
+	NP_READ_CHECK(getNpScene());
+
+	return mCore.getTensionOnly();
+}
+
+void  NpArticulationSpatialTendon::setTensionOnly(bool tensionOnly)
+{
+	PX_ASSERT(!isAPIWriteForbidden());
+	mCore.setTensionOnly(tensionOnly);
+	UPDATE_PVD_PROPERTY
+}
+
 void NpArticulationSpatialTendon::setStiffness(const PxReal stiffness)
 {
 	NpScene* npScene = getNpScene();
@@ -682,6 +696,15 @@ PxU32 NpArticulationFixedTendon::getTendonJoints(PxArticulationTendonJoint** use
 	NP_READ_CHECK(mArticulation->getNpScene());
 
 	return Cm::getArrayOfPointers(userBuffer, bufferSize, startIndex, mTendonJoints.begin(), mTendonJoints.size());
+}
+
+void NpArticulationFixedTendon::setTensionOnly(bool )
+{
+}
+
+bool NpArticulationFixedTendon::getTensionOnly() const
+{
+	return false;
 }
 
 void NpArticulationFixedTendon::setStiffness(const PxReal stiffness)

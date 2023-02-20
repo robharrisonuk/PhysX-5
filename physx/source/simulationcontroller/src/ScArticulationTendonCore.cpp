@@ -31,6 +31,20 @@
 
 using namespace physx;
 
+
+void Sc::ArticulationSpatialTendonCore::setTensionOnly(bool tensionOnly)
+{
+	mTensionOnly = tensionOnly;
+
+	if (mSim)
+		mSim->setTensionOnly(tensionOnly);
+}
+
+bool Sc::ArticulationSpatialTendonCore::getTensionOnly() const
+{
+	return mTensionOnly;
+}
+
 void Sc::ArticulationSpatialTendonCore::setStiffness(const PxReal stiffness)
 {
 	mStiffness = stiffness;

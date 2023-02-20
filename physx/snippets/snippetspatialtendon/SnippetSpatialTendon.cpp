@@ -47,7 +47,7 @@ static PxScene*									gScene = NULL;
 static PxMaterial*								gMaterial = NULL;
 static PxPvd*									gPvd = NULL;
 static PxArticulationReducedCoordinate*			gArticulations[2] = { NULL };
-static const PxReal								gGravity = 9.81f;
+static const PxReal								gGravity = 9.81f * 2.0f;
 static const PxReal								gLinkHalfLength = 0.5f;
 
 PxRigidStatic** getAttachments()
@@ -58,7 +58,8 @@ PxRigidStatic** getAttachments()
 
 static void createSpatialTendonArticulation(PxArticulationReducedCoordinate* articulation,
 											PxRigidStatic** attachmentRigidStatics,
-											const PxVec3 offset)
+											const PxVec3 offset,
+											bool tensionOnly)
 {
 	// link geometry and density:
 	const PxVec3 linkExtents(gLinkHalfLength, 0.05f, 0.05f);
@@ -157,6 +158,8 @@ static void createSpatialTendonArticulation(PxArticulationReducedCoordinate* art
 	PxArticulationAttachment* leafAttachment = tendon->createAttachment(baseAttachment, 1.0f, PxVec3(0.0f), rightLink);
 	leafAttachment->setRestLength(restLength);
 
+	tendon->setTensionOnly(tensionOnly);
+
 	// create attachment render shapes
 	attachmentRigidStatics[0] = gPhysics->createRigidStatic(baseLink->getGlobalPose() * PxTransform(PxVec3(0.0f, gLinkHalfLength, 0.0f), PxQuat(PxIdentity)));
 	attachmentRigidStatics[1] = gPhysics->createRigidStatic(leftLink->getGlobalPose());
@@ -199,9 +202,9 @@ void initPhysics(bool /*interactive*/)
 	gScene = gPhysics->createScene(sceneDesc);
 	gMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.f);
 	gArticulations[0] = gPhysics->createArticulationReducedCoordinate();
-	createSpatialTendonArticulation(gArticulations[0], getAttachments(), PxVec3(0.0f));
+	createSpatialTendonArticulation(gArticulations[0], getAttachments(), PxVec3(0.0f), false);
 	gArticulations[1] = gPhysics->createArticulationReducedCoordinate();
-	createSpatialTendonArticulation(gArticulations[1], &getAttachments()[3], PxVec3(0.0f, 0.0f, 2.0f));
+	createSpatialTendonArticulation(gArticulations[1], &getAttachments()[3], PxVec3(0.0f, 0.0f, 1.0f), true);
 }
 
 void stepPhysics(bool /*interactive*/)

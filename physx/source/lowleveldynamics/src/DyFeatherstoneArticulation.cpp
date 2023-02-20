@@ -2996,7 +2996,8 @@ namespace Dy
 		const PxReal accumLength,
 		const PxU32 startLink,
 		const PxVec3& startAxis,
-		const PxVec3& startRaXn)
+		const PxVec3& startRaXn,
+		bool tensionOnly)
 	{
 		ArticulationAttachment& attachment = attachments[attachmentID];
 		
@@ -3027,7 +3028,7 @@ namespace Dy
 
 				setupInternalSpatialTendonConstraintsRecursive(links, attachments, attachmentCount, cAttachPoint, fixBase, data, Z, stepDt,
 					isTGSSolver, child, stiffness, damping, limitStiffness, u, startLink,
-					startAxis, startRaXn);
+					startAxis, startRaXn, tensionOnly);
 			}
 		}
 		else
@@ -3088,6 +3089,8 @@ namespace Dy
 			constraint->limitBiasCoefficient = (-limitStiffness * x2 * stepDt);//*unitResponse;
 			constraint->limitImpulseMultiplier = isTGSSolver ? 1.f : 1.f - x2;
 			constraint->limitAppliedForce = 0.f;
+
+			constraint->tensionOnly = tensionOnly;
 		}
 	}
 
@@ -3247,7 +3250,8 @@ namespace Dy
 			constraint->limitImpulseMultiplier = isTGSSolver ? 1.f : 1.f - x2;
 			constraint->limitBiasCoefficient = (-limitStiffness * x2 * stepDt);//*unitResponse;
 			constraint->limitAppliedForce = 0.f;
-			
+			constraint->tensionOnly = false;
+
 			/*printf("(%i, %i) r0 %f, r1 %f cmf %f unitResponse %f recipResponse %f a %f x %f\n",
 				pLinkInd, tendonJoint.linkInd, r0, r1, cLink.cfm, unitResponse, recipResponse, a, x);*/
 		}
@@ -3350,7 +3354,7 @@ namespace Dy
 
 				setupInternalSpatialTendonConstraintsRecursive(links, attachments, tendon->getNumAttachments(), pAttachPoint, fixBase, data, Z, stepDt, isTGSSolver,
 					child, tendon->mStiffness, tendon->mDamping, tendon->mLimitStiffness, tendon->mOffset*coefficient, startLink,
-					axis, raXn);
+					axis, raXn, tendon->mTensionOnly);
 			}
 		}
 
@@ -5166,6 +5170,9 @@ namespace Dy
 			V3StoreU(parentVel.linear, parentV.bottom);
 
 			PxReal error = constraint.restDistance - constraint.accumulatedLength;// + deltaP;
+
+			if(constraint.tensionOnly && error > 0.0f)
+				error = 0.0f;
 
 			PxReal error2 = 0.f;
 			if (constraint.accumulatedLength > constraint.highLimit)
