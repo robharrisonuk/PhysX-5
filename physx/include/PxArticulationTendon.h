@@ -287,23 +287,42 @@ namespace physx
 	{
 	public:
 		/**
-		\brief Sets the tenson-only setting of the tendon. If enabled, the tendon will only apply a force when under tension
+		\brief Sets the custom mode.
 
-		\param[in] tensionOnly tension only setting.
-		<b>Default:</b> false
+		\param[in] customMode tendon custom mode setting.
+		<b>Default:</b> 0
 
-		@see getTensionOnly()
+		@see getCustomMode()
 		*/
-		virtual		void							setTensionOnly(bool tensionOnly) = 0;
+		virtual		void							setCustomMode(const PxU8 customMode) = 0;
 
 		/**
-		\brief Gets the tension only setting of the tendon.
+		\brief Gets the custom mode setting of the tendon.
 
-		\return tension only setting.
+		\return custom mode setting.
 
-		@see setTensionOnly()
+		@see setCustomMode()
 		*/
-		virtual		bool							getTensionOnly() const = 0;
+		virtual		PxU8							getCustomMode() const = 0;
+
+		/**
+		\brief Sets the custom parameter for the tendon.
+
+		\param[in] param the custom parameter.
+		<b>Default:</b> 0
+
+		@see getCustomParam()
+		*/
+		virtual		void							setCustomParam(const PxReal param) = 0;
+
+		/**
+		\brief Gets the custom parameter of the tendon.
+
+		\return The custom parameter.
+
+		@see setCustomParam()
+		*/
+		virtual		PxReal							getCustomParam() const = 0;
 
 		/**
 		\brief Sets the spring stiffness term acting on the tendon length.

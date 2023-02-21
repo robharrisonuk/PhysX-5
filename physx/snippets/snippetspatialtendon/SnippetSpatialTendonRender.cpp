@@ -73,11 +73,13 @@ void renderCallback()
 	}
 
 	// render attachments and tendon connecting the attachments:
-	Snippets::renderActors(reinterpret_cast<PxRigidActor**>(getAttachments()), 6, true, attachmentColor, NULL, false, false);
+	Snippets::renderActors(reinterpret_cast<PxRigidActor**>(getAttachments()), 9, true, attachmentColor, NULL, false, false);
 	Snippets::DrawLine(getAttachments()[0]->getGlobalPose().p, getAttachments()[1]->getGlobalPose().p, tendonColor);
 	Snippets::DrawLine(getAttachments()[0]->getGlobalPose().p, getAttachments()[2]->getGlobalPose().p, tendonColor);
 	Snippets::DrawLine(getAttachments()[3]->getGlobalPose().p, getAttachments()[4]->getGlobalPose().p, tendonColor);
 	Snippets::DrawLine(getAttachments()[3]->getGlobalPose().p, getAttachments()[5]->getGlobalPose().p, tendonColor);
+	Snippets::DrawLine(getAttachments()[6]->getGlobalPose().p, getAttachments()[7]->getGlobalPose().p, tendonColor);
+	Snippets::DrawLine(getAttachments()[6]->getGlobalPose().p, getAttachments()[8]->getGlobalPose().p, tendonColor);
 
 	Snippets::finishRender();
 }

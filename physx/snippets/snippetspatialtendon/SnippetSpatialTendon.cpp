@@ -46,20 +46,22 @@ static PxDefaultCpuDispatcher*					gDispatcher = NULL;
 static PxScene*									gScene = NULL;
 static PxMaterial*								gMaterial = NULL;
 static PxPvd*									gPvd = NULL;
-static PxArticulationReducedCoordinate*			gArticulations[2] = { NULL };
+static PxArticulationReducedCoordinate*			gArticulations[3] = { NULL };
 static const PxReal								gGravity = 9.81f * 2.0f;
 static const PxReal								gLinkHalfLength = 0.5f;
 
+static PxReal									gNeutralForce = 0.0f;
+
 PxRigidStatic** getAttachments()
 {
-	static PxRigidStatic* attachments[6] = { NULL };
+	static PxRigidStatic* attachments[9] = { NULL };
 	return attachments;
 }
 
 static void createSpatialTendonArticulation(PxArticulationReducedCoordinate* articulation,
 											PxRigidStatic** attachmentRigidStatics,
 											const PxVec3 offset,
-											bool tensionOnly)
+											int idx)
 {
 	// link geometry and density:
 	const PxVec3 linkExtents(gLinkHalfLength, 0.05f, 0.05f);
@@ -158,7 +160,12 @@ static void createSpatialTendonArticulation(PxArticulationReducedCoordinate* art
 	PxArticulationAttachment* leafAttachment = tendon->createAttachment(baseAttachment, 1.0f, PxVec3(0.0f), rightLink);
 	leafAttachment->setRestLength(restLength);
 
-	tendon->setTensionOnly(tensionOnly);
+	tendon->setCustomMode((PxU8)idx);
+	if (idx == 2)
+	{
+		tendon->setCustomParam((-tendonForce / tendonStiffness) * 1.0f);
+		gNeutralForce = -tendonForce / tendonStiffness;
+	}
 
 	// create attachment render shapes
 	attachmentRigidStatics[0] = gPhysics->createRigidStatic(baseLink->getGlobalPose() * PxTransform(PxVec3(0.0f, gLinkHalfLength, 0.0f), PxQuat(PxIdentity)));
@@ -202,9 +209,11 @@ void initPhysics(bool /*interactive*/)
 	gScene = gPhysics->createScene(sceneDesc);
 	gMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.f);
 	gArticulations[0] = gPhysics->createArticulationReducedCoordinate();
-	createSpatialTendonArticulation(gArticulations[0], getAttachments(), PxVec3(0.0f), false);
+	createSpatialTendonArticulation(gArticulations[0], getAttachments(), PxVec3(0.0f), 0);
 	gArticulations[1] = gPhysics->createArticulationReducedCoordinate();
-	createSpatialTendonArticulation(gArticulations[1], &getAttachments()[3], PxVec3(0.0f, 0.0f, 1.0f), true);
+	createSpatialTendonArticulation(gArticulations[1], &getAttachments()[3], PxVec3(0.0f, 0.0f, 1.0f), 1);
+	gArticulations[2] = gPhysics->createArticulationReducedCoordinate();
+	createSpatialTendonArticulation(gArticulations[2], &getAttachments()[6], PxVec3(0.0f, 0.0f, 2.0f), 2);
 }
 
 void stepPhysics(bool /*interactive*/)
@@ -224,6 +233,7 @@ void stepPhysics(bool /*interactive*/)
 		getAttachments()[1]->setGlobalPose(links[1]->getGlobalPose());
 		getAttachments()[2]->setGlobalPose(links[2]->getGlobalPose());
 	}
+
 	// update articulation that actuates via base link attachment relative pose
 	{
 		const PxReal amplitude = 0.2f;
@@ -244,6 +254,21 @@ void stepPhysics(bool /*interactive*/)
 		getAttachments()[5]->setGlobalPose(links[2]->getGlobalPose());
 	}
 
+	// Update force tendon.
+	{
+		PxReal offset = gNeutralForce * (1.0f + PxSin(time * PxTwoPi * 0.25f - PxPiDivTwo));
+		PxArticulationSpatialTendon* tendon = NULL;
+		gArticulations[2]->getSpatialTendons(&tendon, 1, 0);
+
+		tendon->setCustomParam(offset);
+		gArticulations[2]->wakeUp();
+
+		PxArticulationLink* links[3];
+		gArticulations[2]->getLinks(links, 3, 0);
+		getAttachments()[7]->setGlobalPose(links[1]->getGlobalPose());
+		getAttachments()[8]->setGlobalPose(links[2]->getGlobalPose());
+	}
+
 	gScene->simulate(dt);
 	gScene->fetchResults(true);
 	time += dt;
@@ -253,6 +278,7 @@ void cleanupPhysics(bool /*interactive*/)
 {
 	gArticulations[0]->release();
 	gArticulations[1]->release();
+	gArticulations[2]->release();
 	PX_RELEASE(gScene);
 	PX_RELEASE(gDispatcher);
 	PX_RELEASE(gPhysics);

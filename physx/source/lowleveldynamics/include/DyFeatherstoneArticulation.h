@@ -108,8 +108,9 @@ namespace Dy
 		PxReal	velImpulseMultiplier;
 		PxReal	limitVelImpulseMultiplier;
 
-		bool	tensionOnly;
-		PxU8	padding[7];
+		PxU8	customMode;
+		PxU8	padding[3];
+		PxReal	customParam;
 	};
 
 	struct ArticulationInternalConstraintBase
@@ -1189,7 +1190,8 @@ namespace Dy
 			const PxU32 startLink,
 			const PxVec3& startAxis,
 			const PxVec3& startRaXn,
-			bool tensionOnly = false);
+			const PxU8 customMode,
+			const PxReal customParam);
 
 
 		void setupInternalFixedTendonConstraintsRecursive(

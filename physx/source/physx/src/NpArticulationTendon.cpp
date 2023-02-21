@@ -328,18 +328,35 @@ PxU32 NpArticulationSpatialTendon::getAttachments(PxArticulationAttachment** use
 	return Cm::getArrayOfPointers(userBuffer, bufferSize, startIndex, mAttachments.begin(), mAttachments.size());
 }
 
-bool NpArticulationSpatialTendon::getTensionOnly() const
+PxU8 NpArticulationSpatialTendon::getCustomMode() const
 {
 	NP_READ_CHECK(getNpScene());
 
-	return mCore.getTensionOnly();
+	return mCore.getCustomMode();
 }
 
-void  NpArticulationSpatialTendon::setTensionOnly(bool tensionOnly)
+void  NpArticulationSpatialTendon::setCustomMode(const PxU8 mode)
 {
 	PX_ASSERT(!isAPIWriteForbidden());
-	mCore.setTensionOnly(tensionOnly);
+	mCore.setCustomMode(mode);
 	UPDATE_PVD_PROPERTY
+}
+
+void NpArticulationSpatialTendon::setCustomParam(const PxReal param)
+{
+	PX_CHECK_AND_RETURN(PxIsFinite(param), "PxArticulationTendon::setCustomParam(): invalid value provided!");
+
+	PX_ASSERT(!isAPIWriteForbidden());
+
+	mCore.setCustomParam(param);
+	UPDATE_PVD_PROPERTY
+}
+
+PxReal NpArticulationSpatialTendon::getCustomParam() const
+{
+	NP_READ_CHECK(getNpScene());
+
+	return mCore.getCustomParam();
 }
 
 void NpArticulationSpatialTendon::setStiffness(const PxReal stiffness)
@@ -698,13 +715,22 @@ PxU32 NpArticulationFixedTendon::getTendonJoints(PxArticulationTendonJoint** use
 	return Cm::getArrayOfPointers(userBuffer, bufferSize, startIndex, mTendonJoints.begin(), mTendonJoints.size());
 }
 
-void NpArticulationFixedTendon::setTensionOnly(bool )
+void NpArticulationFixedTendon::setCustomMode(const PxU8 )
 {
 }
 
-bool NpArticulationFixedTendon::getTensionOnly() const
+PxU8 NpArticulationFixedTendon::getCustomMode() const
 {
 	return false;
+}
+
+void NpArticulationFixedTendon::setCustomParam(const PxReal )
+{
+}
+
+PxReal NpArticulationFixedTendon::getCustomParam() const
+{
+	return 0.f;
 }
 
 void NpArticulationFixedTendon::setStiffness(const PxReal stiffness)

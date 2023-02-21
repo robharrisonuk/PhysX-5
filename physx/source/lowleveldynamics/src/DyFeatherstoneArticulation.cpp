@@ -2997,7 +2997,8 @@ namespace Dy
 		const PxU32 startLink,
 		const PxVec3& startAxis,
 		const PxVec3& startRaXn,
-		bool tensionOnly)
+		const PxU8 customMode,
+		const PxReal customParam)
 	{
 		ArticulationAttachment& attachment = attachments[attachmentID];
 		
@@ -3028,7 +3029,7 @@ namespace Dy
 
 				setupInternalSpatialTendonConstraintsRecursive(links, attachments, attachmentCount, cAttachPoint, fixBase, data, Z, stepDt,
 					isTGSSolver, child, stiffness, damping, limitStiffness, u, startLink,
-					startAxis, startRaXn, tensionOnly);
+					startAxis, startRaXn, customMode, customParam);
 			}
 		}
 		else
@@ -3090,7 +3091,8 @@ namespace Dy
 			constraint->limitImpulseMultiplier = isTGSSolver ? 1.f : 1.f - x2;
 			constraint->limitAppliedForce = 0.f;
 
-			constraint->tensionOnly = tensionOnly;
+			constraint->customMode = customMode;
+			constraint->customParam = customParam;
 		}
 	}
 
@@ -3250,7 +3252,8 @@ namespace Dy
 			constraint->limitImpulseMultiplier = isTGSSolver ? 1.f : 1.f - x2;
 			constraint->limitBiasCoefficient = (-limitStiffness * x2 * stepDt);//*unitResponse;
 			constraint->limitAppliedForce = 0.f;
-			constraint->tensionOnly = false;
+			constraint->customMode = 0;
+			constraint->customParam = 0.f;
 
 			/*printf("(%i, %i) r0 %f, r1 %f cmf %f unitResponse %f recipResponse %f a %f x %f\n",
 				pLinkInd, tendonJoint.linkInd, r0, r1, cLink.cfm, unitResponse, recipResponse, a, x);*/
@@ -3354,7 +3357,7 @@ namespace Dy
 
 				setupInternalSpatialTendonConstraintsRecursive(links, attachments, tendon->getNumAttachments(), pAttachPoint, fixBase, data, Z, stepDt, isTGSSolver,
 					child, tendon->mStiffness, tendon->mDamping, tendon->mLimitStiffness, tendon->mOffset*coefficient, startLink,
-					axis, raXn, tendon->mTensionOnly);
+					axis, raXn, tendon->mCustomMode, tendon->mCustomParam);
 			}
 		}
 
@@ -5171,8 +5174,15 @@ namespace Dy
 
 			PxReal error = constraint.restDistance - constraint.accumulatedLength;// + deltaP;
 
-			if(constraint.tensionOnly && error > 0.0f)
-				error = 0.0f;
+			if (constraint.customMode == 1)
+			{
+				if (error > 0.0f)
+					error = 0.0f;
+			}
+			else if (constraint.customMode == 2)
+			{
+				error = constraint.customParam;
+			}
 
 			PxReal error2 = 0.f;
 			if (constraint.accumulatedLength > constraint.highLimit)

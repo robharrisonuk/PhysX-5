@@ -46,7 +46,8 @@ Sc::ArticulationSpatialTendonSim::ArticulationSpatialTendonSim(ArticulationSpati
 	mLLTendon.mDamping = tendon.mDamping;
 	mLLTendon.mOffset = tendon.mOffset;
 	mLLTendon.mLimitStiffness = tendon.mLimitStiffness;
-	mLLTendon.mTensionOnly = tendon.mTensionOnly;
+	mLLTendon.mCustomMode = tendon.mCustomMode;
+	mLLTendon.mCustomParam = tendon.mCustomParam;
 }
 
 
@@ -55,17 +56,30 @@ Sc::ArticulationSpatialTendonSim::~ArticulationSpatialTendonSim()
 	mTendonCore.setSim(NULL);
 }
 
-void Sc::ArticulationSpatialTendonSim::setTensionOnly(bool tensionOnly)
+void Sc::ArticulationSpatialTendonSim::setCustomMode(const PxU8 mode)
 {
-	mLLTendon.mTensionOnly = tensionOnly;
+	mLLTendon.mCustomMode = mode;
 
 	Dy::FeatherstoneArticulation* llArticulation = static_cast<Dy::FeatherstoneArticulation*>(mArtiSim->getLowLevelArticulation());
 	llArticulation->setGpuDirtyFlag(Dy::ArticulationDirtyFlag::eDIRTY_SPATIAL_TENDON);
 }
 
-bool Sc::ArticulationSpatialTendonSim::getTensionOnly() const
+PxU8 Sc::ArticulationSpatialTendonSim::getCustomMode() const
 {
-	return mLLTendon.mTensionOnly;
+	return mLLTendon.mCustomMode;
+}
+
+void Sc::ArticulationSpatialTendonSim::setCustomParam(const PxReal param)
+{
+	mLLTendon.mCustomParam = param;
+
+	Dy::FeatherstoneArticulation* llArticulation = static_cast<Dy::FeatherstoneArticulation*>(mArtiSim->getLowLevelArticulation());
+	llArticulation->setGpuDirtyFlag(Dy::ArticulationDirtyFlag::eDIRTY_SPATIAL_TENDON);
+}
+
+PxReal Sc::ArticulationSpatialTendonSim::getCustomParam() const
+{
+	return mLLTendon.mCustomParam;
 }
 
 void Sc::ArticulationSpatialTendonSim::setStiffness(const PxReal stiffness)

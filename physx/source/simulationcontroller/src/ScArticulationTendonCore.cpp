@@ -32,17 +32,30 @@
 using namespace physx;
 
 
-void Sc::ArticulationSpatialTendonCore::setTensionOnly(bool tensionOnly)
+void Sc::ArticulationSpatialTendonCore::setCustomMode(const PxU8 mode)
 {
-	mTensionOnly = tensionOnly;
+	mCustomMode = mode;
 
 	if (mSim)
-		mSim->setTensionOnly(tensionOnly);
+		mSim->setCustomMode(mode);
 }
 
-bool Sc::ArticulationSpatialTendonCore::getTensionOnly() const
+PxU8 Sc::ArticulationSpatialTendonCore::getCustomMode() const
 {
-	return mTensionOnly;
+	return mCustomMode;
+}
+
+void Sc::ArticulationSpatialTendonCore::setCustomParam(const PxReal param)
+{
+	mCustomParam = param;
+
+	if (mSim)
+		mSim->setCustomParam(param);
+}
+
+PxReal Sc::ArticulationSpatialTendonCore::getCustomParam() const
+{
+	return mCustomParam;
 }
 
 void Sc::ArticulationSpatialTendonCore::setStiffness(const PxReal stiffness)

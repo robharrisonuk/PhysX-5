@@ -53,8 +53,11 @@ namespace Sc
 
 		virtual ~ArticulationSpatialTendonSim();
 
-		void							setTensionOnly(bool tensionOnly);
-		bool							getTensionOnly() const;
+		void							setCustomMode(const PxU8 mode);
+		PxU8							getCustomMode() const;
+
+		void							setCustomParam(const PxReal param);
+		PxReal							getCustomParam() const;
 
 		void							setStiffness(const PxReal stiffness);
 		PxReal							getStiffness() const;
