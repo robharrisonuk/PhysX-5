@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -40,6 +40,7 @@
 namespace physx
 {
 #endif
+	class PxSDFBuilder;
 
 	/**
 	\brief A helper structure to define dimensions in 3D
@@ -144,6 +145,18 @@ namespace physx
 		PxU32 numThreadsForSdfConstruction;
 
 		/**
+		\brief Optional pointer to the geometry of the mesh that is used to compute the SDF. If it is not set, the geometry of the mesh, that this descriptor is passed to during cooking, will be taken.
+		The mesh data must only be available during cooking. It can be released once cooking completed.
+		*/
+		PxSimpleTriangleMesh baseMesh;
+
+		/**
+		\brief Optional pointer to an instance of a SDF builder. This siginificantly speeds up the construction of the SDF since the default sdf builer will do almost all computations directly on the GPU.
+		The user must release the instance of the sdfBuilder once cooking completed.
+		*/
+		PxSDFBuilder* sdfBuilder;
+
+		/**
 		\brief Constructor
 		*/
 		PX_INLINE PxSDFDesc();
@@ -170,6 +183,7 @@ namespace physx
 		bitsPerSubgridPixel = PxSdfBitsPerSubgridPixel::e16_BIT_PER_PIXEL;
 		narrowBandThicknessRelativeToSdfBoundsDiagonal = 0.01f;
 		numThreadsForSdfConstruction = 1;
+		sdfBuilder = NULL;
 	}
 
 	PX_INLINE bool PxSDFDesc::isValid() const

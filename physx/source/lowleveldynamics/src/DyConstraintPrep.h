@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -34,11 +34,6 @@
 #include "DySolverConstraintDesc.h"
 #include "foundation/PxArray.h"
 #include "PxConstraint.h"
-
-#define DY_ARTICULATION_MIN_RESPONSE 1e-5f
-#define DY_ARTICULATION_CFM	2e-4f
-
-#define DY_ARTICULATION_BAD_RESPONSE 0.02f
 
 namespace physx
 {

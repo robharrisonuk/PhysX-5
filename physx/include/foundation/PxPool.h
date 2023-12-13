@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.
 
@@ -202,7 +202,7 @@ class PxPoolBase : public PxUserAllocated, public Alloc
 	// Allocate a slab and segregate it into the freelist
 	void allocateSlab()
 	{
-		T* slab = reinterpret_cast<T*>(Alloc::allocate(mSlabSize, __FILE__, __LINE__));
+		T* slab = reinterpret_cast<T*>(Alloc::allocate(mSlabSize, PX_FL));
 
 		mSlabs.pushBack(slab);
 

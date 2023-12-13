@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -133,7 +133,7 @@ public:
 protected:
 	PX_INLINE                           PxPBDParticleSystem(PxType concreteType, PxBaseFlags baseFlags) : PxParticleSystem(concreteType, baseFlags) {}
 	PX_INLINE                           PxPBDParticleSystem(PxBaseFlags baseFlags) : PxParticleSystem(baseFlags) {}
-	virtual     bool                    isKindOf(const char* name) const PX_OVERRIDE { return !::strcmp("PxPBDParticleSystem", name) || PxParticleSystem::isKindOf(name); }
+	virtual     bool                    isKindOf(const char* name) const PX_OVERRIDE { PX_IS_KIND_OF(name, "PxPBDParticleSystem", PxParticleSystem); }
 };
 
 #if PX_VC

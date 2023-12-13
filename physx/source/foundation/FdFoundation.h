@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.
 
@@ -61,7 +61,6 @@ class PX_FOUNDATION_API Foundation : public PxFoundation, public PxUserAllocated
 	// factory
 	// note, you MUST eventually call release if createInstance returned true!
 	static Foundation* createInstance(PxU32 version, PxErrorCallback& errc, PxAllocatorCallback& alloc);
-	static Foundation& getInstance();
 	static void setInstance(Foundation& foundation);
 	void release();
 	static void incRefCount(); // this call requires a foundation object to exist already
@@ -130,7 +129,7 @@ class PX_FOUNDATION_API Foundation : public PxFoundation, public PxUserAllocated
 	}
 	// End allocations
 
-  private:
+  //private:
 	static void destroyInstance();
 
 	Foundation(PxErrorCallback& errc, PxAllocatorCallback& alloc);
@@ -153,7 +152,6 @@ class PX_FOUNDATION_API Foundation : public PxFoundation, public PxUserAllocated
 
 	Mutex mListenerMutex;
 
-	static Foundation* mInstance;
     PxU32 mRefCount;
 	static PxU32 mWarnOnceTimestap;
 };
@@ -161,10 +159,7 @@ class PX_FOUNDATION_API Foundation : public PxFoundation, public PxUserAllocated
 #pragma warning(pop)
 #endif
 
-PX_INLINE Foundation& getFoundation()
-{
-	return Foundation::getInstance();
-}
+Foundation& getFoundation();
 
 } // namespace physx
 

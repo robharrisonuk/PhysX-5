@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -36,16 +36,8 @@
 
 namespace physx
 {
-
-	struct PxcNpWorkUnit;
-	class PxsConstraintBlockManager;
-	class PxcConstraintBlockStream;
 	struct PxsContactManagerOutput;
-	class FrictionPatchStreamPair;
-	struct PxSolverBody;
-	struct PxSolverBodyData;
 	struct PxSolverConstraintDesc;
-	class PxsContactManager;
 
 	namespace Dy
 	{
@@ -128,23 +120,7 @@ namespace physx
 			const PxReal correlationDistance,
 			const PxReal biasCoefficient,
 			PxConstraintAllocator& constraintAllocator);
-
-		typedef void(*TGSSolveBlockMethod) (const PxConstraintBatchHeader& hdr, const PxSolverConstraintDesc* desc,
-			const PxTGSSolverBodyTxInertia* const txInertias, const PxReal minPenetration, const PxReal elapsedTime, SolverContext& cache);
-
-		typedef void (*TGSWriteBackMethod) (const PxConstraintBatchHeader& hdr, const PxSolverConstraintDesc* desc, SolverContext* cache);
-		
-		typedef void (*TGSSolveConcludeMethod) (const PxConstraintBatchHeader& hdr, const PxSolverConstraintDesc* desc,
-			const PxTGSSolverBodyTxInertia* const txInertias, const PxReal elapsedTime, SolverContext& cache);
-
-		extern TGSSolveBlockMethod g_SolveTGSMethods[];
-
-		extern TGSWriteBackMethod g_WritebackTGSMethods[];
-
-		extern TGSSolveConcludeMethod g_SolveConcludeTGSMethods[];
-
 	}
-
 }
 
 #endif

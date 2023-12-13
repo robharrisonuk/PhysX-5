@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -38,6 +38,7 @@
 #include "NpRigidDynamic.h"
 #include "NpArticulationLink.h"
 #include "CmTransformUtils.h"
+#include "omnipvd/NpOmniPvdSetData.h"
 
 #if PX_SUPPORT_GPU_PHYSX
 #include "NpSoftBody.h"
@@ -53,20 +54,20 @@ using namespace physx;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Sc::BodyCore* physx::getBodyCore(PxRigidActor* actor)
+const Sc::BodyCore* physx::getBodyCore(const PxRigidActor* actor)
 {
-	Sc::BodyCore* core = NULL;
+	const Sc::BodyCore* core = NULL;
 	if(actor)
 	{
 		const PxType type = actor->getConcreteType();
 		if(type == PxConcreteType::eRIGID_DYNAMIC)
 		{
-			NpRigidDynamic* dyn = static_cast<NpRigidDynamic*>(actor);
+			const NpRigidDynamic* dyn = static_cast<const NpRigidDynamic*>(actor);
 			core = &dyn->getCore();
 		}
 		else if(type == PxConcreteType::eARTICULATION_LINK)
 		{
-			NpArticulationLink* link = static_cast<NpArticulationLink*>(actor);
+			const NpArticulationLink* link = static_cast<const NpArticulationLink*>(actor);
 			core = &link->getCore();
 		}
 	}
@@ -414,7 +415,7 @@ void	NpActor::scSetDominanceGroup(PxDominanceGroup v)
 			PX_ASSERT(!isAPIWriteForbidden());
 			getActorCore().setDominanceGroup(v);
 			UPDATE_PVD_PROPERTY
-			OMNI_PVD_SET(actor, dominance, *getPxActor(), v)
+			OMNI_PVD_SET(OMNI_PVD_CONTEXT_HANDLE, PxActor, dominance, *getPxActor(), v)
 		}
 
 void	NpActor::scSetOwnerClient(PxClientID inId)
@@ -423,7 +424,7 @@ void	NpActor::scSetOwnerClient(PxClientID inId)
 			PX_ASSERT(!isAPIWriteForbidden());
 			getActorCore().setOwnerClient(inId);
 			UPDATE_PVD_PROPERTY
-			OMNI_PVD_SET(actor, ownerClient, *getPxActor(), inId)
+			OMNI_PVD_SET(OMNI_PVD_CONTEXT_HANDLE, PxActor, ownerClient, *getPxActor(), inId)
 		}
 
 const PxActor* NpActor::getPxActor() const
@@ -463,7 +464,6 @@ NpActor::Offsets::Offsets()
 #if PX_ENABLE_FEATURES_UNDER_CONSTRUCTION
 	pxActorToNpActor[PxConcreteType::eFLIP_PARTICLESYSTEM]					= size_t(pxToNpActor<NpFLIPParticleSystem>(n)) - addr;
 	pxActorToNpActor[PxConcreteType::eMPM_PARTICLESYSTEM]					= size_t(pxToNpActor<NpMPMParticleSystem>(n)) - addr;
-	pxActorToNpActor[PxConcreteType::eCUSTOM_PARTICLESYSTEM]				= size_t(pxToNpActor<NpCustomParticleSystem>(n)) - addr;
 	pxActorToNpActor[PxConcreteType::eFEM_CLOTH]							= size_t(pxToNpActor<NpFEMCloth>(n)) - addr;
 	pxActorToNpActor[PxConcreteType::eHAIR_SYSTEM]							= size_t(pxToNpActor<NpHairSystem>(n)) - addr;
 #endif
@@ -535,14 +535,6 @@ NpActor::NpOffsets::NpOffsets()
 		const size_t npOffset = size_t(static_cast<NpActor*>(n)) - addr;
 		const size_t bodyOffset = NpMPMParticleSystem::getCoreOffset() - npOffset;
 		npToSc[NpType::eMPM_PARTICLESYSTEM] = bodyOffset;
-	}
-
-	{
-		size_t addr = 0x100;	// casting the null ptr takes a special-case code path, which we don't want
-		NpCustomParticleSystem* n = reinterpret_cast<NpCustomParticleSystem*>(addr);
-		const size_t npOffset = size_t(static_cast<NpActor*>(n)) - addr;
-		const size_t bodyOffset = NpCustomParticleSystem::getCoreOffset() - npOffset;
-		npToSc[NpType::eCUSTOM_PARTICLESYSTEM] = bodyOffset;
 	}
 
 	{

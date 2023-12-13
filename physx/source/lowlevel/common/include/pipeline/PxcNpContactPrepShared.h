@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -47,8 +47,8 @@ static const PxReal PXC_SAME_NORMAL = 0.999f; //Around 6 degrees
 
 PxU32 writeCompressedContact(const PxContactPoint* const PX_RESTRICT contactPoints, const PxU32 numContactPoints, PxcNpThreadContext* threadContext,
 								PxU16& writtenContactCount, PxU8*& outContactPatches, PxU8*& outContactPoints, PxU16& compressedContactSize, PxReal*& contactForces, PxU32 contactForceByteSize,
-								const PxsMaterialManager* materialManager, bool hasModifiableContacts, bool forceNoResponse, PxsMaterialInfo* PX_RESTRICT pMaterial, PxU8& numPatches,
-								PxU32 additionalHeaderSize = 0,  PxsConstraintBlockManager* manager = NULL, PxcConstraintBlockStream* blockStream = NULL, bool insertAveragePoint = false,
+								const PxsMaterialManager* materialManager, bool hasModifiableContacts, bool forceNoResponse, const PxsMaterialInfo* PX_RESTRICT pMaterial, PxU8& numPatches,
+								PxU32 additionalHeaderSize = 0, PxsConstraintBlockManager* manager = NULL, PxcConstraintBlockStream* blockStream = NULL, bool insertAveragePoint = false,
 								PxcDataStreamPool* pool = NULL, PxcDataStreamPool* patchStreamPool = NULL, PxcDataStreamPool* forcePool = NULL, const bool isMeshType = false);
 
 }

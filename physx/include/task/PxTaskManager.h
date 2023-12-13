@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 
 #ifndef PX_TASK_MANAGER_H
 #define PX_TASK_MANAGER_H
@@ -57,10 +57,7 @@ struct PxTaskType
 	{
 		eCPU,				//!< PxTask will be run on the CPU
 		eNOT_PRESENT,		//!< Return code when attempting to find a task that does not exist
-		eCOMPLETED,			//!< PxTask execution has been completed
-		TT_CPU PX_DEPRECATED = eCPU,
-		TT_NOT_PRESENT PX_DEPRECATED = eNOT_PRESENT,
-		TT_COMPLETED PX_DEPRECATED = eCOMPLETED
+		eCOMPLETED			//!< PxTask execution has been completed
 	};
 };
 

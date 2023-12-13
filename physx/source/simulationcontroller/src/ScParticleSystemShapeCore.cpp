@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.  
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.  
 
 #include "foundation/PxPreprocessor.h"
 
@@ -86,7 +86,6 @@ ParticleSystemShapeCore::ParticleSystemShapeCore()
 	mLLCore.solverIterationCounts = (1 << 8) | 4;
 
 	mLLCore.mWind = PxVec3(0.f);
-	mLLCore.periodicBoundary = PxVec3(0.f);
 
 	//mLLCore.mNumUpdateSprings = 0;
 

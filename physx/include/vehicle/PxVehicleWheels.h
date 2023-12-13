@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -127,12 +127,6 @@ PX_FLAGS_OPERATORS(PxVehicleWheelsSimFlag::Enum, PxU32)
 
 class PX_DEPRECATED PxVehicleWheelsSimData
 {
-//= ATTENTION! =====================================================================================
-// Changing the data layout of this class breaks the binary serialization format.  See comments for 
-// PX_BINARY_SERIAL_VERSION.  If a modification is required, please adjust the getBinaryMetaData 
-// function.  If the modification is made on a custom branch, please change PX_BINARY_SERIAL_VERSION
-// accordingly.
-//==================================================================================================
 public:
 
 	friend class PxVehicleWheels;
@@ -639,12 +633,6 @@ struct PX_DEPRECATED PxTireContactIntersectionMethod
 */
 class PX_DEPRECATED PxVehicleWheelsDynData
 {
-//= ATTENTION! =====================================================================================
-// Changing the data layout of this class breaks the binary serialization format.  See comments for 
-// PX_BINARY_SERIAL_VERSION.  If a modification is required, please adjust the getBinaryMetaData 
-// function.  If the modification is made on a custom branch, please change PX_BINARY_SERIAL_VERSION
-// accordingly.
-//==================================================================================================
 public:
 
 	friend class PxVehicleWheels;
@@ -825,12 +813,6 @@ PX_COMPILE_TIME_ASSERT(0==(sizeof(PxVehicleWheelsDynData) & 15));
 */
 class PX_DEPRECATED PxVehicleWheels : public PxBase
 {
-//= ATTENTION! =====================================================================================
-// Changing the data layout of this class breaks the binary serialization format.  See comments for 
-// PX_BINARY_SERIAL_VERSION.  If a modification is required, please adjust the getBinaryMetaData 
-// function.  If the modification is made on a custom branch, please change PX_BINARY_SERIAL_VERSION
-// accordingly.
-//==================================================================================================
 public:
 
 	friend class PxVehicleUpdate;
@@ -950,7 +932,7 @@ protected:
 public:
 	virtual		void			requiresObjects(PxProcessPxBaseCallback& c);
 	virtual		const char*		getConcreteTypeName() const				{	return "PxVehicleWheels"; }
-	virtual		bool			isKindOf(const char* name)	const		{	return !::strcmp("PxVehicleWheels", name) || PxBase::isKindOf(name); }
+	virtual		bool			isKindOf(const char* name)	const		{	PX_IS_KIND_OF(name, "PxVehicleWheels", PxBase); }
 	virtual		void			preExportDataReset() {}
 	virtual		void			exportExtraData(PxSerializationContext&);	
 				void			importExtraData(PxDeserializationContext&);

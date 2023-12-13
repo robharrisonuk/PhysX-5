@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -208,20 +208,7 @@ namespace physx
 		PX_INLINE			PxPBDMaterial(PxType concreteType, PxBaseFlags baseFlags) : PxParticleMaterial(concreteType, baseFlags) {}
 		PX_INLINE			PxPBDMaterial(PxBaseFlags baseFlags) : PxParticleMaterial(baseFlags) {}
 		virtual				~PxPBDMaterial() {}
-		virtual		bool	isKindOf(const char* name) const { return !::strcmp("PxPBDMaterial", name) || PxParticleMaterial::isKindOf(name); }
-	};
-
-	class PxCustomMaterial : public PxParticleMaterial
-	{
-	public:
-
-		virtual		const char*		getConcreteTypeName() const { return "PxCustomMaterial"; }
-
-	protected:
-		PX_INLINE			PxCustomMaterial(PxType concreteType, PxBaseFlags baseFlags) : PxParticleMaterial(concreteType, baseFlags) {}
-		PX_INLINE			PxCustomMaterial(PxBaseFlags baseFlags) : PxParticleMaterial(baseFlags) {}
-		virtual				~PxCustomMaterial() {}
-		virtual		bool	isKindOf(const char* name) const { return !::strcmp("PxCustomMaterial", name) || PxParticleMaterial::isKindOf(name); }
+		virtual		bool	isKindOf(const char* name) const { PX_IS_KIND_OF(name, "PxPBDMaterial", PxParticleMaterial); }
 	};
 #if !PX_DOXYGEN
 } // namespace physx

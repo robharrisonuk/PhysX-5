@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -62,10 +62,20 @@ namespace physx
 
 		\param[in] mesh The tetmesh
 		\param[in] point The point to find the closest tetrahedron for
-		\param[in] bary The barycentric coordinates of the point in the tetrahedron
+		\param[out] bary The barycentric coordinates of the point in the tetrahedron
 		\return The index of the tetrahedon closest to the point
 		*/
 		static PxI32 findTetrahedronClosestToPoint(const PxTetrahedronMesh* mesh, const PxVec3& point, PxVec4& bary);
+
+		/** Associates points with closest tetrahedra from input tetrahedral mesh
+
+		\param[in] tetMeshVertices The tetrahedral mesh vertices
+		\param[in] tetMeshIndices The tetraheral mesh indices
+		\param[in] pointsToEmbed  The points for which the embedding should be created
+        \param[in] barycentricCoordinates  The output barycentric coordinates for each input point relative to its closest tetrahedron
+        \param[in] tetLinks The output indices of the closest tetrahedron for each input point
+		*/
+		static void createPointsToTetrahedronMap(const PxArray<PxVec3>& tetMeshVertices, const PxArray<PxU32>& tetMeshIndices, const PxArray<PxVec3>& pointsToEmbed, PxArray<PxVec4>& barycentricCoordinates, PxArray<PxU32>& tetLinks);
 
 		/** Extracts the surface triangles of a tetmesh
 

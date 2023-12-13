@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 
 #ifndef DY_PARTICLESYSTEM_CORE_H
 #define DY_PARTICLESYSTEM_CORE_H
@@ -39,7 +39,6 @@
 #include "PxMPMParticleSystem.h"
 #endif
 #include "PxParticleSolverType.h"
-#include "PxCustomParticleSystemSolverCallback.h"
 #include "PxSparseGridParams.h"
 
 namespace physx
@@ -66,11 +65,6 @@ public:
 	PxU16					solverIterationCounts;
 
 	PxSparseGridParams		sparseGridParams;
-			
-#if PX_ENABLE_FEATURES_UNDER_CONSTRUCTION
-	PxFLIPParams			flipParams;
-	PxMPMParams				mpmParams;
-#endif
 
 	PxReal					restOffset;
 	PxReal					particleContactOffset;
@@ -84,8 +78,6 @@ public:
 	PxReal					maxDepenetrationVelocity;
 	PxReal					maxVelocity;
 
-	PxVec3					periodicBoundary;
-
 	PxParticleFlags			mFlags;
 			
 	PxVec3					mWind;
@@ -93,6 +85,7 @@ public:
 	PxU32					mMaxNeighborhood; 
 		
 	PxArray<PxU16>			mPhaseGroupToMaterialHandle;
+	PxArray<PxU16>			mUniqueMaterialHandles; //just for reporting
 
 	void addParticleBuffer(PxParticleBuffer* particleBuffer)
 	{
@@ -138,7 +131,7 @@ public:
 
 				default:
 				{
-					PxGetFoundation().error(PxErrorCode::eINVALID_OPERATION, __FILE__, __LINE__, "addParticleBuffer : Error, this buffer does not have a valid type!");
+					PxGetFoundation().error(PxErrorCode::eINVALID_OPERATION, PX_FL, "addParticleBuffer : Error, this buffer does not have a valid type!");
 					return;
 				}
 					
@@ -146,7 +139,7 @@ public:
 		}
 		else
 		{
-			PxGetFoundation().error(PxErrorCode::eINVALID_OPERATION, __FILE__, __LINE__, "addParticleBuffer : Error, this buffer cannot be added to multiple particle systems!");
+			PxGetFoundation().error(PxErrorCode::eINVALID_OPERATION, PX_FL, "addParticleBuffer : Error, this buffer cannot be added to multiple particle systems!");
 		}
 	}
 
@@ -216,7 +209,7 @@ public:
 
 			default:
 			{
-				PxGetFoundation().error(PxErrorCode::eINVALID_OPERATION, __FILE__, __LINE__, "removeParticleBuffer : Error, this buffer does not have a valid type!");
+				PxGetFoundation().error(PxErrorCode::eINVALID_OPERATION, PX_FL, "removeParticleBuffer : Error, this buffer does not have a valid type!");
 				return;
 			}
 
@@ -236,7 +229,6 @@ public:
 	bool							mParticleAndDiffuseBufferUpdate;
 
 	PxParticleSystemCallback* mCallback;
-	PxCustomParticleSystemSolverCallback*	mSolverCallback;
 
 	ParticleSystemCore()
 	{
@@ -269,6 +261,13 @@ public:
 			mParticleAndDiffuseBuffers[i]->onParticleSystemDestroy();
 		}
 	}
+
+#if PX_ENABLE_FEATURES_UNDER_CONSTRUCTION
+	//Leave these members at the end to remain binary compatible with public builds
+	PxFLIPParams			flipParams;
+	PxMPMParams				mpmParams;
+#endif
+
 };
 
 } // namespace Dy

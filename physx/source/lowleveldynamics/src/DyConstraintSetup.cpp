@@ -22,19 +22,21 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
 #include "foundation/PxMemory.h"
 #include "foundation/PxMathUtils.h"
 #include "DyConstraintPrep.h"
+#include "DyArticulationCpuGpu.h"
 #include "PxsRigidBody.h"
 #include "DySolverConstraint1D.h"
 #include "foundation/PxSort.h"
 #include "DySolverConstraintDesc.h"
 #include "PxcConstraintBlockStream.h"
 #include "DyArticulationContactPrep.h"
+#include "foundation/PxSIMDHelpers.h"
 
 namespace physx
 {
@@ -117,7 +119,7 @@ PxQuat diagonalize(const PxMat33& m)	// jacobi rotation using quaternions
 	PxMat33 d;
 	for(PxU32 i=0; i < MAX_ITERS;i++)
 	{
-		const PxMat33 axes(q);
+		const PxMat33Padded axes(q);
 		d = axes.getTranspose() * m * axes;
 
 		const PxReal d0 = PxAbs(d[1][2]), d1 = PxAbs(d[0][2]), d2 = PxAbs(d[0][1]);
@@ -539,10 +541,13 @@ Cm::SpatialVectorF* Z)
 			//minResponseThreshold = PxMax(minResponseThreshold, DY_ARTICULATION_MIN_RESPONSE);
 		}
 
+	
 		setSolverConstants(s.constant, s.unbiasedConstant, s.velMultiplier, s.impulseMultiplier, 
 			c, normalVel, unitResponse, minResponseThreshold, erp, dt, invdt);
 
-		//s.targetVelocity = initVel;
+		//If we have a spring then we will do the following:
+		//s.constant = -dt*kd*(vTar - v0)/denom  - dt*ks*(xTar - x0)/denom
+		//s.unbiasedConstant = -dt*kd*(vTar - v0)/denom  - dt*ks*(xTar - x0)/denom
 		const PxReal velBias = initVel * s.velMultiplier;
 		s.constant += velBias;
 		s.unbiasedConstant += velBias;

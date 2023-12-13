@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -54,37 +54,36 @@ static PxMaterial*				gMaterial		= NULL;
 static PxPvd*					gPvd			= NULL;
 std::vector<SoftBody>			gSoftBodies;
 
-void addSoftBody(PxSoftBody* softBody, const PxFEMParameters& femParams, const PxFEMMaterial& /*femMaterial*/,
-	const PxTransform& transform, const PxReal density, const PxReal scale, const PxU32 iterCount/*, PxMaterial* tetMeshMaterial*/)
+void addSoftBody(PxSoftBody* softBody, const PxFEMParameters& femParams, const PxTransform& transform, const PxReal density, const PxReal scale, const PxU32 iterCount)
 {
-	PxShape* shape = softBody->getShape();
-	PxTetrahedronMeshGeometry tetMeshGeom;
-	shape->getTetrahedronMeshGeometry(tetMeshGeom);
-	PxTetrahedronMesh* colTetMesh = tetMeshGeom.tetrahedronMesh;
-	const PxU32 numVerts = colTetMesh->getNbVertices();
+	PxVec4* simPositionInvMassPinned;
+	PxVec4* simVelocityPinned;
+	PxVec4* collPositionInvMassPinned;
+	PxVec4* restPositionPinned;
 
-	PxBuffer* positionInvMassBuf = gPhysics->createBuffer(numVerts * sizeof(PxVec4), PxBufferType::eHOST, gCudaContextManager);
+	PxSoftBodyExt::allocateAndInitializeHostMirror(*softBody, gCudaContextManager, simPositionInvMassPinned, simVelocityPinned, collPositionInvMassPinned, restPositionPinned);
 	
 	const PxReal maxInvMassRatio = 50.f;
 
 	softBody->setParameter(femParams);
-	//softBody->setMaterial(femMaterial);
 	softBody->setSolverIterationCounts(iterCount);
 
-	PxSoftBodyExt::transform(*softBody, transform, scale);
-	PxSoftBodyExt::updateMass(*softBody, density, maxInvMassRatio);
-	PxSoftBodyExt::commit(*softBody, PxSoftBodyData::eALL);
+	PxSoftBodyExt::transform(*softBody, transform, scale, simPositionInvMassPinned, simVelocityPinned, collPositionInvMassPinned, restPositionPinned);
+	PxSoftBodyExt::updateMass(*softBody, density, maxInvMassRatio, simPositionInvMassPinned);
+	PxSoftBodyExt::copyToDevice(*softBody, PxSoftBodyDataFlag::eALL, simPositionInvMassPinned, simVelocityPinned, collPositionInvMassPinned, restPositionPinned);
 
-	SoftBody sBody(softBody, positionInvMassBuf);
+	SoftBody sBody(softBody, gCudaContextManager);
 
 	gSoftBodies.push_back(sBody);
+
+	PX_PINNED_HOST_FREE(gCudaContextManager, simPositionInvMassPinned);
+	PX_PINNED_HOST_FREE(gCudaContextManager, simVelocityPinned);
+	PX_PINNED_HOST_FREE(gCudaContextManager, collPositionInvMassPinned);
+	PX_PINNED_HOST_FREE(gCudaContextManager, restPositionPinned);
 }
 
 static PxSoftBody* createSoftBody(const PxCookingParams& params, const PxArray<PxVec3>& triVerts, const PxArray<PxU32>& triIndices, bool useCollisionMeshForSimulation = false)
 {
-	PxFEMSoftBodyMaterial* material = PxGetPhysics().createFEMSoftBodyMaterial(1e+6f, 0.45f, 0.5f);
-	material->setDamping(0.005f);
-
 	PxSoftBodyMesh* softBodyMesh;
 
 	PxU32 numVoxelsAlongLongestAABBAxis = 8;
@@ -128,7 +127,7 @@ static PxSoftBody* createSoftBody(const PxCookingParams& params, const PxArray<P
 		gScene->addActor(*softBody);
 
 		PxFEMParameters femParams;
-		addSoftBody(softBody, femParams, *material, PxTransform(PxVec3(0.f, 0.f, 0.f), PxQuat(PxIdentity)), 100.f, 1.0f, 30);
+		addSoftBody(softBody, femParams, PxTransform(PxVec3(0.f, 0.f, 0.f), PxQuat(PxIdentity)), 100.f, 1.0f, 30);
 		softBody->setSoftBodyFlag(PxSoftBodyFlag::eDISABLE_SELF_COLLISION, true);
 	}
 	return softBody;
@@ -237,13 +236,15 @@ void cleanupPhysics(bool /*interactive*/)
 	for (PxU32 i = 0; i < gSoftBodies.size(); i++)
 		gSoftBodies[i].release();
 	gSoftBodies.clear();
+
 	PX_RELEASE(gScene);
 	PX_RELEASE(gDispatcher);
 	PX_RELEASE(gPhysics);
 	PxPvdTransport* transport = gPvd->getTransport();
 	gPvd->release();
 	transport->release();
-	PxCloseExtensions();  
+	PxCloseExtensions();
+
 	gCudaContextManager->release();
 	PX_RELEASE(gFoundation);
 

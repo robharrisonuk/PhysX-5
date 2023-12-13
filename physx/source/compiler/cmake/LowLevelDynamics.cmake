@@ -22,7 +22,7 @@
 ## (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 ## OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ##
-## Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+## Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 
 #
 # Build LowLevelDynamics common
@@ -89,6 +89,7 @@ SET(LLDYNAMICS_SOURCE
 	${LLDYNAMICS_BASE_DIR}/src/DyTGSContactPrep.cpp
 	${LLDYNAMICS_BASE_DIR}/src/DyTGSContactPrepBlock.cpp
 	${LLDYNAMICS_BASE_DIR}/src/DyArticulationContactPrep.h
+	${LLDYNAMICS_BASE_DIR}/src/DyArticulationCpuGpu.h
 	${LLDYNAMICS_BASE_DIR}/src/DyArticulationPImpl.h
 	${LLDYNAMICS_BASE_DIR}/src/DyArticulationUtils.h
 	${LLDYNAMICS_BASE_DIR}/src/DyFeatherstoneArticulationLink.h
@@ -118,10 +119,13 @@ SET(LLDYNAMICS_SOURCE
 	${LLDYNAMICS_BASE_DIR}/src/DySolverControlPF.h
 	${LLDYNAMICS_BASE_DIR}/src/DySolverCore.h
 	${LLDYNAMICS_BASE_DIR}/src/DySolverExt.h
-	${LLDYNAMICS_BASE_DIR}/src/DySpatial.h
 	${LLDYNAMICS_BASE_DIR}/src/DyThreadContext.h
 	${LLDYNAMICS_BASE_DIR}/src/DyTGSDynamics.h
     ${LLDYNAMICS_BASE_DIR}/src/DyTGSContactPrep.h
+    ${LLDYNAMICS_BASE_DIR}/src/DyTGS.h
+    ${LLDYNAMICS_BASE_DIR}/src/DyPGS.h
+	${LLDYNAMICS_BASE_DIR}/src/DySleep.h
+	${LLDYNAMICS_BASE_DIR}/src/DySleep.cpp
 )
 SOURCE_GROUP("src" FILES ${LLDYNAMICS_SOURCE})
 
@@ -164,14 +168,12 @@ TARGET_COMPILE_DEFINITIONS(LowLevelDynamics
 	PRIVATE ${LOWLEVELDYNAMICS_COMPILE_DEFS}
 )
 
-IF(NV_USE_GAMEWORKS_OUTPUT_DIRS)	
-	SET_TARGET_PROPERTIES(LowLevelDynamics PROPERTIES 
-		ARCHIVE_OUTPUT_NAME_DEBUG "LowLevelDynamics_static"
-		ARCHIVE_OUTPUT_NAME_CHECKED "LowLevelDynamics_static"
-		ARCHIVE_OUTPUT_NAME_PROFILE "LowLevelDynamics_static"
-		ARCHIVE_OUTPUT_NAME_RELEASE "LowLevelDynamics_static"
-	)
-ENDIF()
+SET_TARGET_PROPERTIES(LowLevelDynamics PROPERTIES 
+    ARCHIVE_OUTPUT_NAME_DEBUG "LowLevelDynamics_static"
+    ARCHIVE_OUTPUT_NAME_CHECKED "LowLevelDynamics_static"
+    ARCHIVE_OUTPUT_NAME_PROFILE "LowLevelDynamics_static"
+    ARCHIVE_OUTPUT_NAME_RELEASE "LowLevelDynamics_static"
+)
 
 IF(LLDYNAMICS_COMPILE_PDB_NAME_DEBUG)
 	SET_TARGET_PROPERTIES(LowLevelDynamics PROPERTIES 

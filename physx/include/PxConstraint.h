@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -56,9 +56,6 @@ struct PxConstraintFlag
 	enum Enum
 	{
 		eBROKEN						= 1<<0,		//!< whether the constraint is broken
-		ePROJECT_TO_ACTOR0			= 1<<1,		//!< @deprecated whether actor1 should get projected to actor0 for this constraint (note: projection of a static/kinematic actor to a dynamic actor will be ignored)
-		ePROJECT_TO_ACTOR1			= 1<<2,		//!< @deprecated whether actor0 should get projected to actor1 for this constraint (note: projection of a static/kinematic actor to a dynamic actor will be ignored)
-		ePROJECTION					= ePROJECT_TO_ACTOR0 | ePROJECT_TO_ACTOR1,	//!< @deprecated whether the actors should get projected for this constraint (the direction will be chosen by PhysX)
 		eCOLLISION_ENABLED			= 1<<3,		//!< whether contacts should be generated between the objects this constraint constrains
 		eVISUALIZATION				= 1<<4,		//!< whether this constraint should be visualized, if constraint visualization is turned on
 		eDRIVE_LIMITS_ARE_FORCES	= 1<<5,		//!< limits for drive strength are forces rather than impulses
@@ -86,7 +83,6 @@ PX_FLAGS_OPERATORS(PxConstraintFlag::Enum, PxU16)
 struct PxConstraintShaderTable
 {
 	PxConstraintSolverPrep	solverPrep;	//!< solver constraint generation function
-	PxConstraintProject		project;	//!< @deprecated constraint projection function
 	PxConstraintVisualize	visualize;	//!< constraint visualization function
 	PxConstraintFlag::Enum	flag;		//!< constraint flags
 };
@@ -251,7 +247,7 @@ public:
 	\param[in] connector the constraint connector object by which the SDK communicates with the constraint.
 	\param[in] shaders the shader table for the constraint
  
-	@see PxConstraintConnector PxConstraintSolverPrep PxConstraintProject PxConstraintVisualize
+	@see PxConstraintConnector PxConstraintSolverPrep PxConstraintVisualize
 	*/
 	virtual	void				setConstraintFunctions(PxConstraintConnector& connector, const PxConstraintShaderTable& shaders)	= 0;
 
@@ -263,7 +259,7 @@ protected:
 	PX_INLINE					PxConstraint(PxType concreteType, PxBaseFlags baseFlags) : PxBase(concreteType, baseFlags), userData(NULL) {}
 	PX_INLINE					PxConstraint(PxBaseFlags baseFlags) : PxBase(baseFlags), userData(NULL) {}
 	virtual						~PxConstraint() {}
-	virtual	bool				isKindOf(const char* name) const PX_OVERRIDE { return !::strcmp("PxConstraint", name) || PxBase::isKindOf(name); }
+	virtual	bool				isKindOf(const char* name) const PX_OVERRIDE { PX_IS_KIND_OF(name, "PxConstraint", PxBase); }
 };
 
 #if !PX_DOXYGEN

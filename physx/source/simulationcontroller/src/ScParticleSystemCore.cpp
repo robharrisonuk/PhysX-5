@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 
 #include "foundation/PxPreprocessor.h"
 
@@ -146,15 +146,6 @@ PxParticleSystemCallback* Sc::ParticleSystemCore::getParticleSystemCallback() co
 void Sc::ParticleSystemCore::setParticleSystemCallback(PxParticleSystemCallback* callback)
 {
 	mShapeCore.getLLCore().mCallback = callback;
-}
-
-PxCustomParticleSystemSolverCallback* Sc::ParticleSystemCore::getParticleSystemSolverCallback() const
-{
-	return mShapeCore.getLLCore().mSolverCallback;
-}
-void Sc::ParticleSystemCore::setParticleSystemSolverCallback(PxCustomParticleSystemSolverCallback* callback)
-{
-	mShapeCore.getLLCore().mSolverCallback = callback;
 }
 
 PxReal Sc::ParticleSystemCore::getFluidBoundaryDensityScale() const

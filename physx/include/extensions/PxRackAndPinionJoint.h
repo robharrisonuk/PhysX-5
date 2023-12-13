@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -67,8 +67,8 @@ namespace physx
 		/**
 		\brief Set the hinge & prismatic joints connected by the rack & pinion joint.
 
-		The passed hinge joint can be either PxRevoluteJoint, PxD6Joint or PxArticulationJointReducedCoordinate. It cannot be null.
-		The passed prismatic joint can be either PxPrismaticJoint or PxD6Joint. It cannot be null.
+		The passed hinge joint can be either PxRevoluteJoint, PxD6Joint or PxArticulationJointReducedCoordinate.
+		The passed prismatic joint can be either PxPrismaticJoint or PxD6Joint.
 
 		Note that these joints are only used to compute the positional error correction term,
 		used to adjust potential drift between jointed actors. The rack & pinion joint can run without
@@ -82,6 +82,14 @@ namespace physx
 		\return		true if success
 		*/
 		virtual	bool		setJoints(const PxBase* hinge, const PxBase* prismatic)	= 0;
+
+		/**
+		\brief Get the hinge & prismatic joints connected by the rack & pinion joint.
+
+		\param[out]	hinge		The hinge joint (pinion)
+		\param[out]	prismatic	The prismatic joint (rack)
+		*/
+		virtual	void		getJoints(const PxBase*& hinge, const PxBase*& prismatic)	const	= 0;
 
 		/**
 		\brief Set the desired ratio directly.
@@ -125,7 +133,7 @@ namespace physx
 
 		PX_INLINE			PxRackAndPinionJoint(PxBaseFlags baseFlags) : PxJoint(baseFlags)	{}
 
-		virtual	bool		isKindOf(const char* name) const { return !::strcmp("PxRackAndPinionJoint", name) || PxJoint::isKindOf(name);	}
+		virtual	bool		isKindOf(const char* name) const { PX_IS_KIND_OF(name, "PxRackAndPinionJoint", PxJoint);	}
 	};
 
 #if !PX_DOXYGEN

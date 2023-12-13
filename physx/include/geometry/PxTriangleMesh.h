@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -294,7 +294,7 @@ protected:
 	PX_INLINE			PxTriangleMesh(PxBaseFlags baseFlags) : PxRefCounted(baseFlags)										{}
 	virtual				~PxTriangleMesh() {}
 
-	virtual	bool		isKindOf(const char* name) const { return !::strcmp("PxTriangleMesh", name) || PxRefCounted::isKindOf(name); }
+	virtual	bool		isKindOf(const char* name) const { PX_IS_KIND_OF(name, "PxTriangleMesh", PxRefCounted); }
 };
 
 /**
@@ -311,7 +311,7 @@ protected:
 	PX_INLINE			PxBVH33TriangleMesh(PxType concreteType, PxBaseFlags baseFlags) : PxTriangleMesh(concreteType, baseFlags) {}
 	PX_INLINE			PxBVH33TriangleMesh(PxBaseFlags baseFlags) : PxTriangleMesh(baseFlags) {}
 	virtual				~PxBVH33TriangleMesh() {}
-	virtual	bool		isKindOf(const char* name) const { return !::strcmp("PxBVH33TriangleMesh", name) || PxTriangleMesh::isKindOf(name); }
+	virtual	bool		isKindOf(const char* name) const { PX_IS_KIND_OF(name, "PxBVH33TriangleMesh", PxTriangleMesh); }
 };
 
 /**
@@ -327,7 +327,7 @@ protected:
 	PX_INLINE			PxBVH34TriangleMesh(PxType concreteType, PxBaseFlags baseFlags) : PxTriangleMesh(concreteType, baseFlags) {}
 	PX_INLINE			PxBVH34TriangleMesh(PxBaseFlags baseFlags) : PxTriangleMesh(baseFlags) {}
 	virtual				~PxBVH34TriangleMesh() {}
-	virtual	bool		isKindOf(const char* name) const { return !::strcmp("PxBVH34TriangleMesh", name) || PxTriangleMesh::isKindOf(name); }
+	virtual	bool		isKindOf(const char* name) const { PX_IS_KIND_OF(name, "PxBVH34TriangleMesh", PxTriangleMesh); }
 };
 
 #if !PX_DOXYGEN

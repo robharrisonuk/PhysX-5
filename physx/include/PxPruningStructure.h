@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -119,7 +119,7 @@ protected:
 	PX_INLINE					PxPruningStructure(PxType concreteType, PxBaseFlags baseFlags) : PxBase(concreteType, baseFlags) {}
 	PX_INLINE					PxPruningStructure(PxBaseFlags baseFlags) : PxBase(baseFlags) {}
 	virtual						~PxPruningStructure()	{}
-	virtual		bool			isKindOf(const char* name)	const		{ return !::strcmp("PxPruningStructure", name) || PxBase::isKindOf(name); }
+	virtual		bool			isKindOf(const char* name)	const		{ PX_IS_KIND_OF(name, "PxPruningStructure", PxBase); }
 };
 
 

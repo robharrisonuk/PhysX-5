@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -76,9 +76,6 @@ namespace physx
 		PxU8 prevPatches;					//Previous number of patches
 		PxU16 nbContacts;					//Num contacts
 		PxU16 flags;						//Not really part of outputs, but we have 4 bytes of padding, so why not?
-#if PX_X86
-		PxU32 pad[3];
-#endif		
 
 		PX_FORCE_INLINE PxU32* getInternalFaceIndice()
 		{
@@ -93,14 +90,6 @@ namespace physx
 		PxU8 prevPatches;					//Previous number of patches
 		PxU8 statusFlag;					//Status flag;
 		PxU8 unused;						//Unused
-	} PX_ALIGN_SUFFIX(4);
-
-	struct PX_ALIGN_PREFIX(4) PxsContactManagerPersistency
-	{
-		PxU8 mPrevPatches;
-		PxU8 mNbFrictionPatches;
-		PxU8 mNbPrevFrictionPatches;
-		PxU8 pad;
 	} PX_ALIGN_SUFFIX(4);
 
 	struct PX_ALIGN_PREFIX(8) PxsTorsionalFrictionData

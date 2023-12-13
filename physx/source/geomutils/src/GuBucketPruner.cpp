@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -1243,6 +1243,8 @@ PX_FREE(remap);
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #ifdef CAN_USE_MOVEMASK
+namespace
+{
 	struct RayParams
 	{
 		PX_ALIGN(16,	PxVec3	mData2);	float	padding0;
@@ -1250,7 +1252,7 @@ PX_FREE(remap);
 		PX_ALIGN(16,	PxVec3	mData);		float	padding2;
 		PX_ALIGN(16,	PxVec3	mInflate);	float	padding3;
 	};
-
+}
 	static PX_FORCE_INLINE void precomputeRayData(RayParams* PX_RESTRICT rayParams, const PxVec3& rayOrig, const PxVec3& rayDir, float maxDist)
 	{
 	#ifdef USE_SIMD

@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -212,11 +212,15 @@ public:
 	\note Setting an unrealistic center of mass which is a long way from the body can make it difficult for
 	the SDK to solve constraints. Perhaps leading to instability and jittering bodies.
 
+	\note Changing this transform will not update the linear velocity reported by getLinearVelocity() to account
+	for the shift in center of mass. If the shift should be accounted for, the user should update the velocity
+	using setLinearVelocity().
+
 	<b>Default:</b> the identity transform
 
 	\param[in] pose Mass frame offset transform relative to the actor frame. <b>Range:</b> rigid body transform.
 
-	@see getCMassLocalPose() PxRigidBodyDesc.massLocalPose
+	@see getCMassLocalPose() getLinearVelocity()
 	*/
 	virtual		void	setCMassLocalPose(const PxTransform& pose) = 0;
 
@@ -225,7 +229,7 @@ public:
 
 	\return The center of mass pose relative to the actor frame.
 
-	@see setCMassLocalPose() PxRigidBodyDesc.massLocalPose
+	@see setCMassLocalPose()
 	*/
 	virtual		PxTransform 	getCMassLocalPose() const = 0;
 
@@ -246,7 +250,7 @@ public:
 
 	\param[in] mass New mass value for the actor. <b>Range:</b> [0, PX_MAX_F32)
 
-	@see getMass() PxRigidBodyDesc.mass setMassSpaceInertiaTensor()
+	@see getMass() setMassSpaceInertiaTensor()
 	*/
 	virtual		void	setMass(PxReal mass) = 0;
 
@@ -257,7 +261,7 @@ public:
 
 	\return The mass of this actor.
 
-	@see setMass() PxRigidBodyDesc.mass setMassSpaceInertiaTensor()
+	@see setMass() setMassSpaceInertiaTensor()
 	*/
 	virtual		PxReal	getMass() const = 0;
 
@@ -266,7 +270,7 @@ public:
 
 	\return The inverse mass of this actor.
 
-	@see setMass() PxRigidBodyDesc.mass setMassSpaceInertiaTensor()
+	@see setMass() setMassSpaceInertiaTensor()
 	*/
 	virtual		PxReal	getInvMass() const = 0;
 
@@ -289,7 +293,7 @@ public:
 
 	\param[in] m New mass space inertia tensor for the actor.
 
-	@see PxRigidBodyDesc.massSpaceInertia getMassSpaceInertia() setMass() setCMassLocalPose()
+	@see getMassSpaceInertia() setMass() setCMassLocalPose()
 	*/
 	virtual		void	setMassSpaceInertiaTensor(const PxVec3& m) = 0;
 
@@ -302,7 +306,7 @@ public:
 
 	\note A value of 0 in an element is interpreted as infinite inertia along that axis.
 
-	@see PxRigidBodyDesc.massSpaceInertia setMassSpaceInertiaTensor() setMass() setCMassLocalPose()
+	@see setMassSpaceInertiaTensor() setMass() setCMassLocalPose()
 	*/
 	virtual		PxVec3	getMassSpaceInertiaTensor()			const = 0;
 
@@ -315,7 +319,7 @@ public:
 
 	\return The mass space inverse inertia tensor of this actor.
 
-	@see PxRigidBodyDesc.massSpaceInertia setMassSpaceInertiaTensor() setMass() setCMassLocalPose()
+	@see setMassSpaceInertiaTensor() setMass() setCMassLocalPose()
 	*/
 	virtual		PxVec3	getMassSpaceInvInertiaTensor()			const = 0;
 
@@ -328,7 +332,7 @@ public:
 
 	Zero represents no damping. The damping coefficient must be nonnegative.
 
-	<b>Default:</b> 0.0
+	<b>Default:</b> 0.05 for PxArticulationLink, 0.0 for PxRigidDynamic 
 
 	\param[in] linDamp Linear damping coefficient. <b>Range:</b> [0, PX_MAX_F32)
 
@@ -380,6 +384,8 @@ public:
 	\note It is not allowed to use this method while the simulation is running (except during PxScene::collide(),
 	in PxContactModifyCallback or in contact report callbacks).
 
+	\note The linear velocity is reported with respect to the rigid body's center of mass and not the actor frame origin.
+
 	\return The linear velocity of the actor.
 
 	@see PxRigidDynamic.setLinearVelocity() getAngularVelocity()
@@ -402,14 +408,14 @@ public:
 	\brief Lets you set the maximum linear velocity permitted for this actor.
 
 	With this function, you can set the  maximum linear velocity permitted for this rigid body.
-	Higher angular velocities are clamped to this value.
+	Higher linear velocities are clamped to this value.
 
-	Note: The angular velocity is clamped to the set value <i>before</i> the solver, which means that
+	Note: The linear velocity is clamped to the set value <i>before</i> the solver, which means that
 	the limit may still be momentarily exceeded.
 
-	<b>Default:</b> PX_MAX_F32
+	<b>Default:</b> 100*PxTolerancesScale::length for PxArticulationLink, 1e^16 for PxRigidDynamic
 
-	\param[in] maxLinVel Max allowable linear velocity for actor. <b>Range:</b> [0, PX_MAX_F32)
+	\param[in] maxLinVel Max allowable linear velocity for actor. <b>Range:</b> [0, 1e^16)
 
 	@see getMaxAngularVelocity()
 	*/
@@ -436,9 +442,11 @@ public:
 	Note: The angular velocity is clamped to the set value <i>before</i> the solver, which means that
 	the limit may still be momentarily exceeded.
 
-	<b>Default:</b> 100.0
+	<b>Default:</b> 50.0 for PxArticulationLink, 100.0 for PxRigidDynamic
 
-	\param[in] maxAngVel Max allowable angular velocity for actor. <b>Range:</b> [0, PX_MAX_F32)
+	<b>Range:</b> [0, 1e^16)
+
+	\param[in] maxAngVel Max allowable angular velocity for actor. 
 
 	@see getMaxAngularVelocity()
 	*/
@@ -699,7 +707,7 @@ protected:
 	PX_INLINE			PxRigidBody(PxType concreteType, PxBaseFlags baseFlags) : PxRigidActor(concreteType, baseFlags) {}
 	PX_INLINE			PxRigidBody(PxBaseFlags baseFlags) : PxRigidActor(baseFlags) {}
 	virtual				~PxRigidBody()	{}
-	virtual		bool	isKindOf(const char* name)	const	{ return !::strcmp("PxRigidBody", name) || PxRigidActor::isKindOf(name); }
+	virtual		bool	isKindOf(const char* name)	const	{ PX_IS_KIND_OF(name, "PxRigidBody", PxRigidActor); }
 };
 
 #if !PX_DOXYGEN

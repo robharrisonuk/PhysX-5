@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -69,12 +69,12 @@ typedef uint64_t OmniPvdObjectHandle;
 typedef uint64_t OmniPvdContextHandle;
 typedef uint32_t OmniPvdClassHandle;
 typedef uint32_t OmniPvdAttributeHandle;
-typedef uint16_t OmniPvdAttributeDataType;
 typedef uint32_t OmniPvdVersionType;
+typedef uint32_t OmniPvdEnumValueType;
 
 typedef void (OMNI_PVD_CALL *OmniPvdLogFunction)(char *logLine);
 
-struct OmniPvdDataTypeEnum
+struct OmniPvdDataType
 {
 	enum Enum
 	{
@@ -94,5 +94,50 @@ struct OmniPvdDataTypeEnum
 		eFLAGS_WORD
 	};
 };
+
+template<uint32_t tType>
+inline uint32_t getOmniPvdDataTypeSize() { return 0; }
+
+template<>
+inline uint32_t getOmniPvdDataTypeSize<OmniPvdDataType::eINT8>() { return sizeof(int8_t); }
+
+template<>
+inline uint32_t getOmniPvdDataTypeSize<OmniPvdDataType::eINT16>() { return sizeof(int16_t); }
+
+template<>
+inline uint32_t getOmniPvdDataTypeSize<OmniPvdDataType::eINT32>() { return sizeof(int32_t); }
+
+template<>
+inline uint32_t getOmniPvdDataTypeSize<OmniPvdDataType::eINT64>() { return sizeof(int64_t); }
+
+template<>
+inline uint32_t getOmniPvdDataTypeSize<OmniPvdDataType::eUINT8>() { return sizeof(uint8_t); }
+
+template<>
+inline uint32_t getOmniPvdDataTypeSize<OmniPvdDataType::eUINT16>() { return sizeof(uint16_t); }
+
+template<>
+inline uint32_t getOmniPvdDataTypeSize<OmniPvdDataType::eUINT32>() { return sizeof(uint32_t); }
+
+template<>
+inline uint32_t getOmniPvdDataTypeSize<OmniPvdDataType::eUINT64>() { return sizeof(uint64_t); }
+
+template<>
+inline uint32_t getOmniPvdDataTypeSize<OmniPvdDataType::eFLOAT32>() { return sizeof(float); }
+
+template<>
+inline uint32_t getOmniPvdDataTypeSize<OmniPvdDataType::eFLOAT64>() { return sizeof(double); }
+
+template<>
+inline uint32_t getOmniPvdDataTypeSize<OmniPvdDataType::eSTRING>() { return 0; }
+
+template<>
+inline uint32_t getOmniPvdDataTypeSize<OmniPvdDataType::eOBJECT_HANDLE>() { return sizeof(OmniPvdObjectHandle); }
+
+template<>
+inline uint32_t getOmniPvdDataTypeSize<OmniPvdDataType::eENUM_VALUE>() { return sizeof(OmniPvdEnumValueType); }
+
+template<>
+inline uint32_t getOmniPvdDataTypeSize<OmniPvdDataType::eFLAGS_WORD>() { return sizeof(OmniPvdClassHandle); }
 
 #endif

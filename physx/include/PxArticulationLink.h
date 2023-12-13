@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -157,7 +157,6 @@ public:
 	/**
 	\brief Get the linear velocity of the link.
 
-	- The linear velocity is with respect to the link's center of mass and not the actor frame origin.
 	- For performance, prefer PxArticulationCache::linkVelocity to get link spatial velocities in a batch query.
 	- When the articulation state is updated via non-cache API, use PxArticulationReducedCoordinate::updateKinematic before querying velocity.
 
@@ -165,6 +164,8 @@ public:
 
 	\note This call is not allowed while the simulation is running except in a split simulation during #PxScene::collide() and up to #PxScene::advance(),
 	and in PxContactModifyCallback or in contact report callbacks.
+
+	\note The linear velocity is reported with respect to the link's center of mass and not the actor frame origin.
 
 	@see PxRigidBody::getCMassLocalPose
 	*/
@@ -194,7 +195,7 @@ protected:
 	PX_INLINE								PxArticulationLink(PxType concreteType, PxBaseFlags baseFlags) : PxRigidBody(concreteType, baseFlags) {}
 	PX_INLINE								PxArticulationLink(PxBaseFlags baseFlags) : PxRigidBody(baseFlags)	{}
 	virtual									~PxArticulationLink()	{}
-	virtual		bool						isKindOf(const char* name)	const		{ return !::strcmp("PxArticulationLink", name) || PxRigidBody::isKindOf(name);	}
+	virtual		bool						isKindOf(const char* name)	const		{ PX_IS_KIND_OF(name, "PxArticulationLink", PxRigidBody);	}
 };
 
 #if !PX_DOXYGEN

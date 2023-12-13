@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -42,8 +42,8 @@ namespace physx
 		PxReal			restitution;		//12
 		PxReal			damping;			//16
 		PxMaterialFlags	flags;				//18
-		PxU8			fricCombineMode;	//19
-		PxU8			restCombineMode;	//20
+		PxU8			fricCombineMode;	//19	PxCombineMode::Enum
+		PxU8			restCombineMode;	//20	PxCombineMode::Enum
 
 		PxsMaterialData() :
 			dynamicFriction	(0.0f),
@@ -61,7 +61,6 @@ namespace physx
 		PX_CUDA_CALLABLE PX_FORCE_INLINE PxCombineMode::Enum getRestitutionCombineMode()	const	{ return PxCombineMode::Enum(restCombineMode);	}
 		PX_FORCE_INLINE void setFrictionCombineMode(PxCombineMode::Enum combineMode)				{ fricCombineMode = PxTo8(combineMode);			}
 		PX_FORCE_INLINE void setRestitutionCombineMode(PxCombineMode::Enum combineMode)				{ restCombineMode = PxTo8(combineMode);			}
-
 	};
 
 	typedef MaterialCoreT<PxsMaterialData, PxMaterial>	PxsMaterialCore;

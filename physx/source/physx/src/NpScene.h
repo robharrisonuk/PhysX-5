@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -99,13 +99,11 @@ class NpHairSystem;
 class NpPBDParticleSystem;
 class NpFLIPParticleSystem;
 class NpMPMParticleSystem;
-class NpCustomParticleSystem;
 class NpFEMSoftBodyMaterial;
 class NpFEMClothMaterial;
 class NpPBDMaterial;
 class NpFLIPMaterial;
 class NpMPMMaterial;
-class NpCustomMaterial;
 #endif
 
 class NpContactCallbackTask : public physx::PxLightCpuTask
@@ -137,6 +135,9 @@ class NpScene : public NpSceneAccessor, public PxUserAllocated
 
 	virtual			void							setFlag(PxSceneFlag::Enum flag, bool value);
 	virtual			PxSceneFlags					getFlags() const;
+
+	virtual			void							setName(const char* name);
+	virtual			const char*						getName() const;
 
 	// implement PxScene:
 
@@ -305,21 +306,24 @@ class NpScene : public NpSceneAccessor, public PxUserAllocated
 
 	virtual         PxPvdSceneClient*				getScenePvdClient();
 
-	virtual			void							copyArticulationData(void* data, void* index, PxArticulationGpuDataType::Enum dataType, const PxU32 nbCopyArticulations, void* copyEvent);
-	virtual			void							applyArticulationData(void* data, void* index, PxArticulationGpuDataType::Enum dataType, const PxU32 nbUpdatedArticulations, void* waitEvent, void* signalEvent);
-	virtual			void							copyContactData(void* data, const PxU32 numContactPatches, void* numContactPairs, void* copyEvent);
+	virtual			void							copyArticulationData(void* data, void* index, PxArticulationGpuDataType::Enum dataType, const PxU32 nbCopyArticulations, CUevent copyEvent);
+	virtual			void							applyArticulationData(void* data, void* index, PxArticulationGpuDataType::Enum dataType, const PxU32 nbUpdatedArticulations, CUevent waitEvent, CUevent signalEvent);
+	virtual 		void							updateArticulationsKinematic(CUevent signalEvent);
+	virtual			void							copyContactData(void* data, const PxU32 numContactPatches, void* numContactPairs, CUevent copyEvent);
 	
-	virtual			void							copySoftBodyData(void** data, void* dataSizes, void* softBodyIndices, PxSoftBodyDataFlag::Enum flag, const PxU32 nbCopySoftBodies, const PxU32 maxSize, void* copyEvent);
-	virtual			void							applySoftBodyData(void** data, void* dataSizes, void* softBodyIndices, PxSoftBodyDataFlag::Enum flag, const PxU32 nbUpdatedSoftBodies, const PxU32 maxSize, void* applyEvent);
+	virtual			void							copySoftBodyData(void** data, void* dataSizes, void* softBodyIndices, PxSoftBodyGpuDataFlag::Enum flag, const PxU32 nbCopySoftBodies, const PxU32 maxSize, CUevent copyEvent);
+	virtual			void							applySoftBodyData(void** data, void* dataSizes, void* softBodyIndices, PxSoftBodyGpuDataFlag::Enum flag, const PxU32 nbUpdatedSoftBodies, const PxU32 maxSize, CUevent applyEvent, CUevent signalEvent);
 
-	virtual			void							copyBodyData(PxGpuBodyData* data, PxGpuActorPair* index, const PxU32 nbCopyActors, void* copyEvent);	
-	virtual			void							applyActorData(void* data, PxGpuActorPair* index, PxActorCacheFlag::Enum flag, const PxU32 nbUpdatedActors, void* waitEvent, void* signalEvent);
+	virtual			void							copyBodyData(PxGpuBodyData* data, PxGpuActorPair* index, const PxU32 nbCopyActors, CUevent copyEvent);	
+	virtual			void							applyActorData(void* data, PxGpuActorPair* index, PxActorCacheFlag::Enum flag, const PxU32 nbUpdatedActors, CUevent waitEvent, CUevent signalEvent);
 
-	virtual			void							computeDenseJacobians(const PxIndexDataPair* indices, PxU32 nbIndices, void* computeEvent);
-	virtual			void							computeGeneralizedMassMatrices(const PxIndexDataPair* indices, PxU32 nbIndices, void* computeEvent);
-	virtual			void							computeGeneralizedGravityForces(const PxIndexDataPair* indices, PxU32 nbIndices, void* computeEvent);
-	virtual			void							computeCoriolisAndCentrifugalForces(const PxIndexDataPair* indices, PxU32 nbIndices, void* computeEvent);
-	virtual			void							applyParticleBufferData(const PxU32* indices, const PxGpuParticleBufferIndexPair* bufferIndexPairs, const PxParticleBufferFlags* flags, PxU32 nbUpdatedBuffers, void* waitEvent, void* signalEvent);
+	virtual			void							evaluateSDFDistances(const PxU32* sdfShapeIds, const PxU32 nbShapes, const PxVec4* samplePointsConcatenated, const PxU32* samplePointCountPerShape, const PxU32 maxPointCount, PxVec4* localGradientAndSDFConcatenated, CUevent event);
+
+	virtual			void							computeDenseJacobians(const PxIndexDataPair* indices, PxU32 nbIndices, CUevent computeEvent);
+	virtual			void							computeGeneralizedMassMatrices(const PxIndexDataPair* indices, PxU32 nbIndices, CUevent computeEvent);
+	virtual			void							computeGeneralizedGravityForces(const PxIndexDataPair* indices, PxU32 nbIndices, CUevent computeEvent);
+	virtual			void							computeCoriolisAndCentrifugalForces(const PxIndexDataPair* indices, PxU32 nbIndices, CUevent computeEvent);
+	virtual			void							applyParticleBufferData(const PxU32* indices, const PxGpuParticleBufferIndexPair* bufferIndexPairs, const PxParticleBufferFlags* flags, PxU32 nbUpdatedBuffers, CUevent waitEvent, CUevent signalEvent);
 
 	virtual			PxSolverType::Enum				getSolverType()	const;
 
@@ -368,7 +372,6 @@ class NpScene : public NpSceneAccessor, public PxUserAllocated
 	virtual			bool							fetchQueries(bool block);
 	//~PxSceneSQSystem
 
-	//internal public methods:
 	public:
 													NpScene(const PxSceneDesc& desc, NpPhysics&);
 													~NpScene();
@@ -416,10 +419,6 @@ class NpScene : public NpSceneAccessor, public PxUserAllocated
 					void							addMaterial(const NpMPMMaterial& mat);
 					void							updateMaterial(const NpMPMMaterial& mat);
 					void							removeMaterial(const NpMPMMaterial& mat);
-
-					void							addMaterial(const NpCustomMaterial& mat);
-					void							updateMaterial(const NpCustomMaterial& mat);
-					void							removeMaterial(const NpCustomMaterial& mat);
 #endif
 
 					void							executeScene(PxBaseTask* continuation);
@@ -439,7 +438,6 @@ class NpScene : public NpSceneAccessor, public PxUserAllocated
 	PX_FORCE_INLINE	void							removeFromParticleSystemList(PxPBDParticleSystem&);
 	PX_FORCE_INLINE	void							removeFromParticleSystemList(PxFLIPParticleSystem&);
 	PX_FORCE_INLINE	void							removeFromParticleSystemList(PxMPMParticleSystem&);
-	PX_FORCE_INLINE	void							removeFromParticleSystemList(PxCustomParticleSystem&);
 	PX_FORCE_INLINE	void							removeFromHairSystemList(PxHairSystem&);
 	PX_FORCE_INLINE	void							removeFromAggregateList(PxAggregate&);
 
@@ -512,6 +510,8 @@ class NpScene : public NpSceneAccessor, public PxUserAllocated
 	PX_FORCE_INLINE	PxU32							getFlagsFast()						const	{ return mScene.getFlags();			}
 	PX_FORCE_INLINE PxReal							getWakeCounterResetValueInternal()	const	{ return mWakeCounterResetValue;	}
 
+	PX_FORCE_INLINE bool							isDirectGPUAPIInitialized()				 	{ return mScene.isDirectGPUAPIInitialized(); }
+
 					// PT: TODO: consider merging the "sc" methods with the np ones, as we did for constraints
 
 					void 							scAddActor(NpRigidStatic&, bool noSim, PxBounds3* uninflatedBounds, const Gu::BVH* bvh);
@@ -536,9 +536,6 @@ class NpScene : public NpSceneAccessor, public PxUserAllocated
 
 					void							scAddParticleSystem(NpMPMParticleSystem&);
 					void							scRemoveParticleSystem(NpMPMParticleSystem&);
-
-					void							scAddParticleSystem(NpCustomParticleSystem&);
-					void							scRemoveParticleSystem(NpCustomParticleSystem&);
 #endif
 					void							scAddHairSystem(NpHairSystem&);
 					void							scRemoveHairSystem(NpHairSystem&);
@@ -598,7 +595,6 @@ private:
 
 					void							updateDirtyShaders();
 
-					void							fireOutOfBoundsCallbacks();
 					void							fetchResultsPreContactCallbacks();
 					void							fetchResultsPostContactCallbacks();
 					void							fetchResultsParticleSystem();
@@ -611,6 +607,8 @@ private:
 					void							syncSQ();
 					void							sceneQueriesStaticPrunerUpdate(PxBaseTask* continuation);
 					void							sceneQueriesDynamicPrunerUpdate(PxBaseTask* continuation);
+
+					void							syncMaterialEvents();
 
 					NpSceneQueries					mNpSQ;
 					PxPruningStructureType::Enum	mPrunerType[2];
@@ -631,7 +629,6 @@ private:
 					PxCoalescedHashSet<PxPBDParticleSystem*>				mPBDParticleSystems;
 					PxCoalescedHashSet<PxFLIPParticleSystem*>				mFLIPParticleSystems;
 					PxCoalescedHashSet<PxMPMParticleSystem*>				mMPMParticleSystems;
-					PxCoalescedHashSet<PxCustomParticleSystem*>				mCustomParticleSystems;
 					PxCoalescedHashSet<PxHairSystem*>						mHairSystems;
 					PxCoalescedHashSet<PxAggregate*>						mAggregates;
 
@@ -718,7 +715,6 @@ private:
 
 					bool							mSQUpdateRunning;
 
-					bool							mHasSimulatedOnce;
 					bool							mBetweenFetchResults;
 					bool							mBuildFrozenActors;
 
@@ -747,23 +743,22 @@ private:
 					PxArray<MaterialEvent>		mScenePBDMaterialBuffer;
 					PxArray<MaterialEvent>		mSceneFLIPMaterialBuffer;
 					PxArray<MaterialEvent>		mSceneMPMMaterialBuffer;
-					PxArray<MaterialEvent>		mSceneCustomMaterialBuffer;
 					PxMutex						mSceneMaterialBufferLock;
 					PxMutex						mSceneFEMSoftBodyMaterialBufferLock;
 					PxMutex						mSceneFEMClothMaterialBufferLock;
 					PxMutex						mScenePBDMaterialBufferLock;
 					PxMutex						mSceneFLIPMaterialBufferLock;
 					PxMutex						mSceneMPMMaterialBufferLock;
-					PxMutex						mSceneCustomMaterialBufferLock;
 					Sc::Scene					mScene;
 #if PX_SUPPORT_PVD
 					Vd::PvdSceneClient			mScenePvdClient;
 #endif
-					PxReal						mWakeCounterResetValue;
+					const PxReal				mWakeCounterResetValue;
 
 					PxgDynamicsMemoryConfig		mGpuDynamicsConfig;
 
 					NpPhysics&					mPhysics;
+					const char*				    mName;
 };
 
 template<>
@@ -817,13 +812,6 @@ PX_FORCE_INLINE	void NpScene::removeFromParticleSystemList(PxFLIPParticleSystem&
 PX_FORCE_INLINE	void NpScene::removeFromParticleSystemList(PxMPMParticleSystem& particleSystem)
 {
 	const bool exists = mMPMParticleSystems.erase(&particleSystem);
-	PX_ASSERT(exists);
-	PX_UNUSED(exists);
-}
-
-PX_FORCE_INLINE	void NpScene::removeFromParticleSystemList(PxCustomParticleSystem& particleSystem)
-{
-	const bool exists = mCustomParticleSystems.erase(&particleSystem);
 	PX_ASSERT(exists);
 	PX_UNUSED(exists);
 }

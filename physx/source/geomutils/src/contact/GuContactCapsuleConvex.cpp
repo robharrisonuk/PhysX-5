@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -289,7 +289,7 @@ static void GuGenerateVFContacts2(PxContactBuffer& contactBuffer,
 	{
 		const PxVec3& rayOrigin = points[i];
 
-		const PxVec3 vrayOrig = world2vertexSkew.transform( rayOrigin );
+		const PxVec3 vrayOrig = world2vertexSkew.transform(rayOrigin);
 		PxF32 t;
 		if(raycast_convexMesh2(polyData, vrayOrig, vrayDir, maxDist, t))
 		{

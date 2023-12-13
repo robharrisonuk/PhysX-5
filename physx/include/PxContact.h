@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -35,6 +35,7 @@
 
 #include "foundation/PxVec3.h"
 #include "foundation/PxAssert.h"
+#include "PxConstraintDesc.h"
 #include "PxNodeIndex.h"
 
 #if !PX_DOXYGEN
@@ -50,20 +51,6 @@ namespace physx
 #define PXC_CONTACT_NO_FACE_INDEX 0xffffffff
 
 class PxActor;
-
-/**
-\brief Struct for specifying mass modification for a pair of rigids
-\deprecated Use #PxConstraintInvMassScale instead. Deprecated since PhysX version 5.1.
-*/
-PX_ALIGN_PREFIX(16)
-struct PX_DEPRECATED PxMassModificationProps
-{
-	PxReal mInvMassScale0;
-	PxReal mInvInertiaScale0;
-	PxReal mInvMassScale1;
-	PxReal mInvInertiaScale1;
-}
-PX_ALIGN_SUFFIX(16);
 
 /**
 \brief Header for a contact patch where all points share same material and normal
@@ -86,65 +73,65 @@ struct PxContactPatch
 	/**
 	\brief Modifiers for scaling the inertia of the involved bodies
 	*/
-	PX_ALIGN(16, PxMassModificationProps mMassModification);			//16
+	PX_ALIGN(16, PxConstraintInvMassScale mMassModification);
 
 	/**
 	\brief Contact normal
 	*/
-	PX_ALIGN(16, PxVec3	normal);									//28
+	PX_ALIGN(16, PxVec3	normal);
 
 	/**
 	\brief Restitution coefficient
 	*/
-	PxReal	restitution;											//32
+	PxReal	restitution;
 
 	/**
 	\brief Dynamic friction coefficient
 	*/
-	PxReal	dynamicFriction;										//36
+	PxReal	dynamicFriction;
 
 	/**
 	\brief Static friction coefficient
 	*/
-	PxReal	staticFriction;											//40
+	PxReal	staticFriction;
 
 	/**
 	\brief Damping coefficient (for compliant contacts)
 	*/
-	PxReal	damping;												//44
+	PxReal	damping;
 
 	/**
 	\brief Index of the first contact in the patch
 	*/
-	PxU16	startContactIndex;										//46
+	PxU16	startContactIndex;
 	
 	/**
 	\brief The number of contacts in this patch
 	*/
-	PxU8	nbContacts;												//47  //Can be a U8
+	PxU8	nbContacts;
 
 	/**
 	\brief The combined material flag of two actors that come in contact
 	@see PxMaterialFlag, PxCombineMode
 	*/
-	PxU8	materialFlags;											//48  //Can be a U16
+	PxU8	materialFlags;
 
 	/**
 	\brief The PxContactPatchFlags for this patch
 	*/
-	PxU16	internalFlags;											//50  //Can be a U16
+	PxU16	internalFlags;
 
 	/**
 	\brief Material index of first body
 	*/
-	PxU16	materialIndex0;											//52  //Can be a U16
+	PxU16	materialIndex0;
 
 	/**
 	\brief Material index of second body
 	*/
-	PxU16	materialIndex1;											//54  //Can be a U16
+	PxU16	materialIndex1;
 
-	PxU16	pad[5];													//64
+	PxU16	pad[5];
 }
 PX_ALIGN_SUFFIX(16);
 
@@ -157,11 +144,11 @@ struct PxContact
 	/**
 	\brief Contact point in world space
 	*/
-	PxVec3	contact;							//12
+	PxVec3	contact;
 	/**
 	\brief Separation value (negative implies penetration).
 	*/
-	PxReal	separation;							//16
+	PxReal	separation;
 }
 PX_ALIGN_SUFFIX(16);
 
@@ -174,11 +161,11 @@ struct PxExtendedContact : public PxContact
 	/**
 	\brief Target velocity
 	*/
-	PX_ALIGN(16, PxVec3 targetVelocity);		//28
+	PX_ALIGN(16, PxVec3 targetVelocity);
 	/**
 	\brief Maximum impulse
 	*/
-	PxReal	maxImpulse;							//32
+	PxReal	maxImpulse;
 }
 PX_ALIGN_SUFFIX(16);
 
@@ -192,33 +179,33 @@ struct PxModifiableContact : public PxExtendedContact
 	/**
 	\brief Contact normal
 	*/
-	PX_ALIGN(16, PxVec3	normal);					//44
+	PX_ALIGN(16, PxVec3	normal);
 	/**
 	\brief Restitution coefficient
 	*/
-	PxReal	restitution;							//48
+	PxReal	restitution;
 	
 	/**
 	\brief Material Flags
 	*/
-	PxU32	materialFlags;							//52
+	PxU32	materialFlags;
 	
 	/**
 	\brief Shape A's material index
 	*/
-	PxU16	materialIndex0;							//54
+	PxU16	materialIndex0;
 	/**
 	\brief Shape B's material index
 	*/
-	PxU16	materialIndex1;							//56
+	PxU16	materialIndex1;
 	/**
 	\brief static friction coefficient
 	*/
-	PxReal	staticFriction;							//60
+	PxReal	staticFriction;
 	/**
 	\brief dynamic friction coefficient
 	*/	
-	PxReal dynamicFriction;							//64
+	PxReal dynamicFriction;
 }
 PX_ALIGN_SUFFIX(16);
 
@@ -441,7 +428,7 @@ struct PxContactStreamIterator
 	*/
 	PX_CUDA_CALLABLE PX_FORCE_INLINE PxReal getInvMassScale0() const
 	{
-		return patch->mMassModification.mInvMassScale0;
+		return patch->mMassModification.linear0;
 	}
 
 	/**
@@ -450,7 +437,7 @@ struct PxContactStreamIterator
 	*/
 	PX_CUDA_CALLABLE PX_FORCE_INLINE PxReal getInvMassScale1() const
 	{
-		return patch->mMassModification.mInvMassScale1;
+		return patch->mMassModification.linear1;
 	}
 
 	/**
@@ -459,7 +446,7 @@ struct PxContactStreamIterator
 	*/
 	PX_CUDA_CALLABLE PX_FORCE_INLINE PxReal getInvInertiaScale0() const
 	{
-		return patch->mMassModification.mInvInertiaScale0;
+		return patch->mMassModification.angular0;
 	}
 
 	/**
@@ -468,7 +455,7 @@ struct PxContactStreamIterator
 	*/
 	PX_CUDA_CALLABLE PX_FORCE_INLINE PxReal getInvInertiaScale1() const
 	{
-		return patch->mMassModification.mInvInertiaScale1;
+		return patch->mMassModification.angular1;
 	}
 
 	/**

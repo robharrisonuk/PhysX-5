@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -84,7 +84,11 @@ ConvexMesh::ConvexMesh(MeshFactory* factory, ConvexHullInitData& data) :
 	mInertia		(data.mInertia),
 	mMeshFactory	(factory)
 {
-	mHullData = data.mHullData;	
+	mHullData = data.mHullData;
+
+	// this constructor takes ownership of memory from the data object
+	data.mSdfData = NULL;
+	data.mBigConvexData = NULL;
 }
 
 ConvexMesh::~ConvexMesh()
@@ -99,16 +103,11 @@ ConvexMesh::~ConvexMesh()
 
 bool ConvexMesh::isGpuCompatible() const
 {
-	PxReal maxR = PxMax(mHullData.mInternal.mExtents[0], PxMax(mHullData.mInternal.mExtents[1], mHullData.mInternal.mExtents[2]));
-	PxReal minR = mHullData.mInternal.mRadius;
-
-	PxReal ratio = maxR/minR;
-
 	return mHullData.mNbHullVertices <= 64 &&
 		mHullData.mNbPolygons <= 64 &&
 		mHullData.mPolygons[0].mNbVerts <= 32 &&
 		mHullData.mNbEdges.isBitSet() &&
-		ratio < 100.f;
+		mHullData.checkExtentRadiusRatio();
 }
 
 void ConvexMesh::exportExtraData(PxSerializationContext& context)
@@ -116,6 +115,14 @@ void ConvexMesh::exportExtraData(PxSerializationContext& context)
 	context.alignData(PX_SERIAL_ALIGN);
 	const PxU32 bufferSize = computeBufferSize(mHullData, getNb());
 	context.writeData(mHullData.mPolygons, bufferSize);
+
+	if (mSdfData)
+	{
+		context.alignData(PX_SERIAL_ALIGN);
+		context.writeData(mSdfData, sizeof(SDF));
+
+		mSdfData->exportExtraData(context);
+	}
 
 	if(mBigConvexData)
 	{
@@ -130,6 +137,13 @@ void ConvexMesh::importExtraData(PxDeserializationContext& context)
 {
 	const PxU32 bufferSize = computeBufferSize(mHullData, getNb());
 	mHullData.mPolygons = reinterpret_cast<HullPolygonData*>(context.readExtraData<PxU8, PX_SERIAL_ALIGN>(bufferSize));
+
+	if (mSdfData)
+	{
+		mSdfData = context.readExtraData<SDF, PX_SERIAL_ALIGN>();
+		PX_PLACEMENT_NEW(mSdfData, SDF(PxEmpty));
+		mSdfData->importExtraData(context);
+	}
 
 	if(mBigConvexData)
 	{
@@ -188,6 +202,8 @@ static bool convexHullLoad(ConvexHullData& data, PxInputStream& stream, PxBitAnd
 	void* mDataMemory = PX_ALLOC(bytesNeeded, "ConvexHullData data");
 
 	PxU8* address = reinterpret_cast<PxU8*>(mDataMemory);
+
+	PX_ASSERT(address);
 
 	data.mPolygons				= reinterpret_cast<HullPolygonData*>(address);	address += sizeof(HullPolygonData) * data.mNbPolygons;
 	PxVec3* mDataHullVertices	= reinterpret_cast<PxVec3*>(address);			address += sizeof(PxVec3) * data.mNbHullVertices;

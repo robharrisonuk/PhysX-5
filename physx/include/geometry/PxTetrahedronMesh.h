@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -76,12 +76,19 @@ namespace physx
 		*/
 		virtual void					release() = 0;
 
+		/**
+		\brief Get the inverse mass of each vertex of the tetrahedron mesh.
+
+		\return PxReal* A pointer to an array of inverse mass for each vertex of the tetrahedron mesh. Size: number of vertices * sizeof(PxReal).
+		 */
+		virtual PxReal*					getGridModelInvMass() = 0;
+
 	protected:
 		PX_INLINE						PxSoftBodyAuxData(PxType concreteType, PxBaseFlags baseFlags) : PxRefCounted(concreteType, baseFlags) {}
 		PX_INLINE						PxSoftBodyAuxData(PxBaseFlags baseFlags) : PxRefCounted(baseFlags) {}
 		virtual							~PxSoftBodyAuxData() {}
 
-		virtual	bool					isKindOf(const char* name) const { return !::strcmp("PxSoftBodyAuxData", name) || PxRefCounted::isKindOf(name); }
+		virtual	bool					isKindOf(const char* name) const { PX_IS_KIND_OF(name, "PxSoftBodyAuxData", PxRefCounted); }
 	};
 
 	/**
@@ -192,7 +199,7 @@ namespace physx
 		PX_INLINE						PxTetrahedronMesh(PxBaseFlags baseFlags) : PxRefCounted(baseFlags) {}
 		virtual							~PxTetrahedronMesh() {}
 
-		virtual	bool					isKindOf(const char* name) const { return !::strcmp("PxTetrahedronMesh", name) || PxRefCounted::isKindOf(name); }
+		virtual	bool					isKindOf(const char* name) const { PX_IS_KIND_OF(name, "PxTetrahedronMesh", PxRefCounted); }
 	};
 	
 	/**
@@ -269,7 +276,7 @@ namespace physx
 		PX_INLINE						PxSoftBodyMesh(PxBaseFlags baseFlags) : PxRefCounted(baseFlags) {}
 		virtual							~PxSoftBodyMesh() {}
 
-		virtual	bool					isKindOf(const char* name) const { return !::strcmp("PxSoftBodyMesh", name) || PxRefCounted::isKindOf(name); }
+		virtual	bool					isKindOf(const char* name) const { PX_IS_KIND_OF(name, "PxSoftBodyMesh", PxRefCounted); }
 	};
 
 

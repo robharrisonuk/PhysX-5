@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -54,12 +54,6 @@ namespace physx
 
 	class NpArticulationReducedCoordinate : public PxArticulationReducedCoordinate, public NpBase
 	{
-		//= ATTENTION! =====================================================================================
-		// Changing the data layout of this class breaks the binary serialization format.  See comments for 
-		// PX_BINARY_SERIAL_VERSION.  If a modification is required, please adjust the getBinaryMetaData 
-		// function.  If the modification is made on a custom branch, please change PX_BINARY_SERIAL_VERSION
-		// accordingly.
-		//==================================================================================================
 	public:
 		virtual											~NpArticulationReducedCoordinate();
 
@@ -232,7 +226,7 @@ namespace physx
 		//---------------------------------------------------------------------------------
 		NpArticulationReducedCoordinate();
 
-		virtual		bool			isKindOf(const char* name) const { return !::strcmp("PxArticulationReducedCoordinate", name) || PxBase::isKindOf(name); }
+		virtual		bool			isKindOf(const char* name) const { PX_IS_KIND_OF(name, "PxArticulationReducedCoordinate", PxBase); }
 
 		PxArticulationJointReducedCoordinate*			createArticulationJoint(PxArticulationLink& parent,
 																				const PxTransform& parentFrame,

@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.  
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.  
 
 // ****************************************************************************
 // This snippet illustrates the use of PhysX immediate mode.
@@ -175,7 +175,7 @@ public:
 	{
 	}
 
-	virtual bool recordContacts(const PxContactPoint* contactPoints, const PxU32 nbContacts, const PxU32 index)
+	virtual bool recordContacts(const PxContactPoint* contactPoints, PxU32 nbContacts, PxU32 index)
 	{
 		PX_UNUSED(index);
 		{

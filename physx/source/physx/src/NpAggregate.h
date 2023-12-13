@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -38,12 +38,6 @@ class NpScene;
 
 class NpAggregate : public PxAggregate, public NpBase
 {
-//= ATTENTION! =====================================================================================
-// Changing the data layout of this class breaks the binary serialization format.  See comments for 
-// PX_BINARY_SERIAL_VERSION.  If a modification is required, please adjust the getBinaryMetaData 
-// function.  If the modification is made on a custom branch, please change PX_BINARY_SERIAL_VERSION
-// accordingly.
-//==================================================================================================
 public:
 // PX_SERIALIZATION
 												NpAggregate(PxBaseFlags baseFlags) : PxAggregate(baseFlags), NpBase(PxEmpty) {}
@@ -81,13 +75,10 @@ public:
 		PX_FORCE_INLINE	bool					getSelfCollideFast()	const	{ return PxGetAggregateSelfCollisionBit(mFilterHint)!=0;	}
 		PX_FORCE_INLINE	PxAggregateFilterHint	getFilterHint()			const	{ return mFilterHint;	}
 
-						void					addActorInternal(PxActor& actor, NpScene& s, const PxBVH* bvh);
-						void					removeAndReinsert(PxActor& actor, bool reinsert);
+						void					scRemoveActor(NpActor& actor, bool reinsert);
 						bool					removeActorAndReinsert(PxActor& actor, bool reinsert);
 						bool					removeArticulationAndReinsert(PxArticulationReducedCoordinate& art, bool reinsert);
-
-						void					scAddActor(NpActor&);
-						void					scRemoveActor(NpActor& actor, bool reinsert);
+						void					addToScene(NpScene& scene);
 
 						void					incShapeCount();
 						void					decShapeCount();
@@ -99,6 +90,10 @@ private:
 						PxU32					mNbActors;
 						PxU32					mNbShapes;
 						PxActor**				mActors;
+
+						void					scAddActor(NpActor&);
+						void					removeAndReinsert(PxActor& actor, bool reinsert);
+						void					addActorInternal(PxActor& actor, NpScene& s, const PxBVH* bvh);
 };
 
 }

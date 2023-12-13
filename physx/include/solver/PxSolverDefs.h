@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.
 
@@ -130,14 +130,14 @@ struct PxSolverConstraintDesc
 	PxU32	bodyADataIndex;			//!< Body A's index into the SolverBodyData array
 	PxU32	bodyBDataIndex;			//!< Body B's index into the SolverBodyData array
 
-	PxU32	linkIndexA;				//!< Link index defining which link in Articulation A this constraint affects. If not an articulation, must be NO_LINK
-	PxU32	linkIndexB;				//!< Link index defining which link in Articulation B this constraint affects. If not an articulation, must be NO_LINK
+	PxU32	linkIndexA;				//!< Link index defining which link in Articulation A this constraint affects. If not an articulation, must be PxSolverConstraintDesc::RIGID_BODY
+	PxU32	linkIndexB;				//!< Link index defining which link in Articulation B this constraint affects. If not an articulation, must be PxSolverConstraintDesc::RIGID_BODY
 	PxU8*	constraint;				//!< Pointer to the constraint rows to be solved
 	void*	writeBack;				//!< Pointer to the writeback structure results for this given constraint are to be written to
 	
 	PxU16	progressA;				//!< Internal progress counter
 	PxU16	progressB;				//!< Internal progress counter
-	PxU16	constraintLengthOver16;	//!< constraintLength/16, max constraint length is 1MB, allows PxSolverConstraintDesc to fit in 32 bytes
+	PxU16	constraintLengthOver16;	//!< constraintLength/16, max constraint length is 1MB
 	PxU8	padding[10];
 };
 
@@ -295,7 +295,7 @@ struct PxArticulationFlag
 		eFIX_BASE = (1 << 0),				//!< Set articulation base to be fixed.
 		eDRIVE_LIMITS_ARE_FORCES = (1<<1),	//!< Limits for drive effort are forces and torques rather than impulses, see PxArticulationDrive::maxForce.
 		eDISABLE_SELF_COLLISION = (1<<2),	//!< Disable collisions between the articulation's links (note that parent/child collisions are disabled internally in either case).
-		eCOMPUTE_JOINT_FORCES = (1<<3)		//!< Enable in order to be able to query joint solver (i.e. constraint) forces using PxArticulationCache::jointSolverForces.
+		eCOMPUTE_JOINT_FORCES = (1<<3)		//!< @deprecated Enable in order to be able to query joint solver (i.e. constraint) forces using PxArticulationCache::jointSolverForces.
 	};
 };
 

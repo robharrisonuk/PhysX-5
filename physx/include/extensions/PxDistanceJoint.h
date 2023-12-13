@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -204,34 +204,6 @@ public:
 	virtual PxReal					getDamping()	const	= 0;
 
 	/**
-	\brief Set the contact distance for the min & max distance limits.
-
-	This is similar to the PxJointLimitParameters::contactDistance parameter for regular limits.
-
-	The two most common values are 0 and infinite. Infinite means the internal constraints are
-	always created, resulting in the best simulation quality but slower performance. Zero means
-	the internal constraints are only created when the limits are violated, resulting in best
-	performance but worse simulation quality.
-
-	<b>Default</b> 0.0f
-	<b>Range</b> [0, PX_MAX_F32)
-
-	\param[in] contactDistance	The contact distance
-
-	@see PxJointLimitParameters::contactDistance getContactDistance()
-	*/
-	virtual void					setContactDistance(PxReal contactDistance)	= 0;
-
-	/**
-	\brief Get the contact distance.
-
-	\return the contact distance
-
-	@see PxJointLimitParameters::contactDistance setContactDistance()
-	*/
-	virtual PxReal					getContactDistance()	const	= 0;
-
-	/**
 	\brief Set the flags specific to the Distance Joint.
 
 	<b>Default</b> PxDistanceJointFlag::eMAX_DISTANCE_ENABLED
@@ -283,7 +255,7 @@ protected:
 	/**
 	\brief Returns whether a given type name matches with the type of this instance
 	*/							
-	virtual	bool					isKindOf(const char* name)	const { return !::strcmp("PxDistanceJoint", name) || PxJoint::isKindOf(name);	}
+	virtual	bool					isKindOf(const char* name)	const { PX_IS_KIND_OF(name, "PxDistanceJoint", PxJoint);	}
 
 	//~serialization
 };

@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -37,10 +37,9 @@ using namespace Sc;
 
 static ShapeSim& getSimForShape(const ShapeCore& core, const ActorSim& actorSim)
 {
-	if(core.getSim())
+	if(core.getExclusiveSim())
 	{
-		//Exclusive shape.
-		return *core.getSim();
+		return *core.getExclusiveSim();
 	}
 
 	//Must be a shared shape.
@@ -58,8 +57,7 @@ static ShapeSim& getSimForShape(const ShapeCore& core, const ActorSim& actorSim)
 	return *reinterpret_cast<ShapeSim*>(1);
 }
 
-RigidCore::RigidCore(const PxActorType::Enum type) 
-: ActorCore(type, PxActorFlag::eVISUALIZATION, PX_DEFAULT_CLIENT, 0)
+RigidCore::RigidCore(const PxActorType::Enum type) : ActorCore(type, PxActorFlag::eVISUALIZATION, PX_DEFAULT_CLIENT, 0)
 {
 }
 

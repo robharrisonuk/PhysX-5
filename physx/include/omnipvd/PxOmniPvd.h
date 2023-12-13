@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -44,16 +44,72 @@ class PxFoundation;
 class PxOmniPvd
 {
 public:
+	class ScopedExclusiveWriter
+	{
+	  public:
+		PX_FORCE_INLINE ScopedExclusiveWriter(PxOmniPvd* omniPvd)
+		{			
+			mOmniPvd = omniPvd;
+			mWriter = NULL;
+			if (mOmniPvd) {			
+				mWriter = mOmniPvd->acquireExclusiveWriterAccess();
+			}
+		}
+
+		PX_FORCE_INLINE ~ScopedExclusiveWriter()
+		{
+			if (mOmniPvd && mWriter) {
+				mOmniPvd->releaseExclusiveWriterAccess();
+			}
+		}
+
+		PX_FORCE_INLINE OmniPvdWriter* operator-> ()
+		{
+			return mWriter;
+		}
+		
+		PX_FORCE_INLINE OmniPvdWriter* getWriter()
+		{
+			return mWriter;
+		}
+	private:
+		OmniPvdWriter* mWriter;
+		PxOmniPvd* mOmniPvd;
+	};
+
 	virtual ~PxOmniPvd()
 	{
 	}
 	/**
-	\brief Gets an instance of the OmniPvd writer
+	\brief Get the OmniPvd writer.
+	
+	Gets an instance of the OmniPvd writer. The writer access will not be thread safe since the OmniPVD API is not thread safe itself. Writing concurrently and simultaneously using the OmniPVD API is undefined.
+	
+	For thread safe exlcusive access use the mechanism acquireExclusiveWriterAccess/releaseExclusiveWriterAccess.
 
 	\return OmniPvdWriter instance on succes, NULL otherwise.
 	*/
 	virtual OmniPvdWriter* getWriter() = 0;
 	
+	/**
+	\brief Acquires an exclusive writer access.
+	
+	This call blocks until exclusive access to the writer can be acquired. Once access has been granted, it is guaranteed that no other caller can access the writer through this method until releaseExclusiveWriterAccess() has been called.
+	
+	This allows to safely write PVD data in environments with concurrent processing workflows.
+
+	\return OmniPvdWriter instance on succes, NULL otherwise.
+	*/
+	virtual OmniPvdWriter* acquireExclusiveWriterAccess() = 0;
+
+	/**
+	\brief Releases the exclusive writer access
+	
+	Releases the access to the writer that was previously acquired using acquireExclusiveWriterAccess.
+
+	*/
+	virtual void releaseExclusiveWriterAccess() = 0;
+
 	/**
 	\brief Gets an instance to the OmniPvd file write stream
 	
@@ -73,6 +129,7 @@ public:
 
 	*/
 	virtual void release() = 0;
+
 };
 #if !PX_DOXYGEN
 } // namespace physx

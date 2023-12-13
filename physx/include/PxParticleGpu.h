@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -113,8 +113,6 @@ public:
 */
 struct PxGpuParticleData
 {
-	PxVec3	mPeriod;                        //!< Size of the unit cell for periodic boundary conditions. If 0, the size of the simulation domain is specified by the mGridSize * mParticleContactDistance.
-
 	PxU32	mGridSizeX;                     //!< Size of the x-dimension of the background simulation grid. Translates to an absolute size of mGridSizeX * mParticleContactDistance. 
 	PxU32	mGridSizeY;                     //!< Size of the y-dimension of the background simulation grid. Translates to an absolute size of mGridSizeY * mParticleContactDistance.
 	PxU32	mGridSizeZ;                     //!< Size of the z-dimension of the background simulation grid. Translates to an absolute size of mGridSizeZ * mParticleContactDistance.

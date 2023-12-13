@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -551,7 +551,7 @@ enum InternalMeshSerialFlag
 			if (allocateGPUData)
 			{
 				const PxU32 numElements = nbGridTetrahedrons / numTetsPerElement;
-				const PxU32 numVertsPerElement = numTetsPerElement == 6 ? 8 : 4;
+				const PxU32 numVertsPerElement = (numTetsPerElement == 6 || numTetsPerElement == 5) ? 8 : 4;
 
 				mGridModelInvMass = reinterpret_cast<float*>(PX_ALLOC(nbGridVerts * sizeof(float), "mGridModelInvMass"));
 				mGridModelTetraRestPoses = reinterpret_cast<PxMat33*>(PX_ALLOC(nbGridTetrahedrons * sizeof(PxMat33), "mGridModelTetraRestPoses"));

@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -210,12 +210,12 @@ bool ConvexMeshBuilder::copy(Gu::ConvexHullInitData& hullData)
 	{
 		hullData.mHullData.mSdfData = mSdfData;
 		hullData.mSdfData = mSdfData;
+		mSdfData = NULL;
 	}
 	else
 	{
 		hullData.mHullData.mSdfData = NULL;
 		hullData.mSdfData = NULL;
-		mSdfData = NULL;
 	}
 
 	// internal data
@@ -530,7 +530,7 @@ void ConvexMeshBuilder::computeInternalObjects()
 			data.mInternal.mRadius = dist;
 	}
 
-	ComputeInternalExtent(data, hullPolys);		
+	ComputeInternalExtent(data, hullPolys);
 
 	PX_ASSERT(PxVec3(mHullData.mInternal.mExtents[0], mHullData.mInternal.mExtents[1], mHullData.mInternal.mExtents[2]).isFinite());
 	PX_ASSERT(mHullData.mInternal.mExtents[0] != 0.0f);
@@ -538,9 +538,13 @@ void ConvexMeshBuilder::computeInternalObjects()
 	PX_ASSERT(mHullData.mInternal.mExtents[2] != 0.0f);
 }
 
+bool ConvexMeshBuilder::checkExtentRadiusRatio()
+{
+	return mHullData.checkExtentRadiusRatio();
+}
+
 void ConvexMeshBuilder::computeSDF(const PxConvexMeshDesc& desc)
 {
-
 	PX_DELETE(mSdfData);
 	PX_NEW_SERIALIZED(mSdfData, SDF);
 	//create triangle mesh from polygons
@@ -605,8 +609,21 @@ void ConvexMeshBuilder::computeSDF(const PxConvexMeshDesc& desc)
 		sdfDesc.subgridSize, sdfDesc.sdfSubgrids3DTexBlockDim.x, sdfDesc.sdfSubgrids3DTexBlockDim.y, sdfDesc.sdfSubgrids3DTexBlockDim.z, 
 		sdfDesc.subgridsMinSdfValue, sdfDesc.subgridsMaxSdfValue, sdfDesc.bitsPerSubgridPixel);
 
-	//copy, and compact to get rid of strides:
-	immediateCooking::gatherStrided(sdfDesc.sdf.data, sdf, sdfDesc.dims.x*sdfDesc.dims.y*sdfDesc.dims.z, sizeof(PxReal), sdfDesc.sdf.stride);
+	if (sdfDesc.subgridSize > 0)
+	{
+		//Sparse sdf
+		immediateCooking::gatherStrided(sdfDesc.sdf.data, sdf, sdfDesc.sdf.count, sizeof(PxReal), sdfDesc.sdf.stride);
+
+		immediateCooking::gatherStrided(sdfDesc.sdfSubgrids.data, mSdfData->mSubgridSdf,
+			sdfDesc.sdfSubgrids.count,
+			sizeof(PxU8), sdfDesc.sdfSubgrids.stride);
+		immediateCooking::gatherStrided(sdfDesc.sdfStartSlots.data, mSdfData->mSubgridStartSlots, sdfDesc.sdfStartSlots.count, sizeof(PxU32), sdfDesc.sdfStartSlots.stride);
+	}
+	else
+	{
+		//copy, and compact to get rid of strides:
+		immediateCooking::gatherStrided(sdfDesc.sdf.data, sdf, sdfDesc.dims.x * sdfDesc.dims.y * sdfDesc.dims.z, sizeof(PxReal), sdfDesc.sdf.stride);
+	}
 
 }
 //~TEST_INTERNAL_OBJECTS

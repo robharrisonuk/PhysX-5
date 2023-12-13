@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.
 
@@ -560,7 +560,7 @@ class PxArray : protected Alloc
 	{
 		if(size > 0)
 		{
-			T* p = reinterpret_cast<T*>(Alloc::allocate(sizeof(T) * size, __FILE__, __LINE__));
+			T* p = reinterpret_cast<T*>(Alloc::allocate(sizeof(T) * size, PX_FL));
 			PxMarkSerializedMemory(p, sizeof(T) * size);
 			return p;
 		}

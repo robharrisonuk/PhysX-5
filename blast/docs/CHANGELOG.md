@@ -1,5 +1,36 @@
 # Changelog
 
+## [5.0.3] - 1-November-2023
+
+### Bugfixes
+- Fixed memory leak in NvBlastExtAuthoringFindAssetConnectingBonds reported in issue #185.
+
+
+## [5.0.2] - 25-July-2023
+
+### Bugfixes
+- Fixed slice fracturing bug which set the local chunk transform to the identity in some cases
+
+
+## [5.0.1] - 22-June-2023
+
+### Bugfixes
+- Use proper constructors for NvTransform and NvVec3 to avoid using garbage data
+
+
+## [5.0.0] - 23-Jan-2023
+
+### Changes
+- Removed all PhysX dependencies from code outside of the ExtPx extension
+- Replaced Px types with NvShared types
+- NvFoundation headers in include/shared/NvFoundation
+  - Includes NvPreprocessor.h and NvcTypes.h (formerly in include/lowlevel)
+  - Include basic Nv types, such as NvVec3 (used by the Tk library)
+- Consolidated header structure
+  - include/lowlevel/NvBlastPreprocessor.h is gone
+  - Previously-defined NVBLAST_API has been renamed NV_C_API and is now defined in NvPreprocessor.h
+
+
 ## [4.0.2] - 31-Aug-2022
 
 ### Bugfixes

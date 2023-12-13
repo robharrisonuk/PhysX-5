@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -134,7 +134,8 @@ namespace physx
 		/**
 		\brief Constructor to build a tetmeshdescription that links to the vertices and indices provided
 		*/
-		PxTetrahedronMeshDesc(physx::PxArray<physx::PxVec3>& meshVertices, physx::PxArray<physx::PxU32>& meshTetIndices, const PxTetrahedronMeshDesc::PxMeshFormat meshFormat = eTET_MESH)
+		PxTetrahedronMeshDesc(physx::PxArray<physx::PxVec3>& meshVertices, physx::PxArray<physx::PxU32>& meshTetIndices, 
+			const PxTetrahedronMeshDesc::PxMeshFormat meshFormat = eTET_MESH, PxU16 numberOfTetsPerHexElement = 5)
 		{
 			points.count = meshVertices.size();
 			points.stride = sizeof(float) * 3;
@@ -147,7 +148,7 @@ namespace physx
 			if (meshFormat == eTET_MESH)
 				tetsPerElement = 1;
 			else
-				tetsPerElement = 6;
+				tetsPerElement = numberOfTetsPerHexElement;
 		}
 
 		PX_INLINE bool isValid() const
@@ -178,7 +179,7 @@ namespace physx
 			}
 
 			//The model can only be either a tetmesh (1 tet per element), or have 5 or 6 tets per hex element, otherwise invalid.
-			if (tetsPerElement != 1 && tetsPerElement != 6)
+			if (tetsPerElement != 1 && tetsPerElement != 5 && tetsPerElement != 6)
 				return false;
 
 			return true;

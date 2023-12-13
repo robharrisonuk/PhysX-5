@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -670,6 +670,11 @@ namespace physx
 			const PxU32 groupID = mNextPhaseGroupID++;
 
 			core.mPhaseGroupToMaterialHandle.pushBack(materialHandle);
+			PxU16* foundHandle = core.mUniqueMaterialHandles.find(materialHandle);
+			if(foundHandle == core.mUniqueMaterialHandles.end())
+			{
+				core.mUniqueMaterialHandles.pushBack(materialHandle);
+			}
 
 			if (mCore.getSim())
 				mCore.getSim()->getLowLevelParticleSystem()->mFlag |= Dy::ParticleSystemFlag::eUPDATE_PHASE;
@@ -700,6 +705,12 @@ namespace physx
 		PX_ASSERT(!isAPIWriteForbidden());
 		NpDestroyParticleSystem(this);
 	}
+
+    PxU32 NpPBDParticleSystem::getParticleMaterials(PxParticleMaterial** userBuffer, PxU32 bufferSize,
+                                                    PxU32 startIndex) const
+    {
+	    return getParticleMaterialsInternal<NpPBDMaterial>(userBuffer, bufferSize, startIndex);
+    }
 
 	void NpPBDParticleSystem::addParticleBuffer(PxParticleBuffer* clothBuffer)
 	{
@@ -781,6 +792,11 @@ namespace physx
 			const PxU32 groupID = mNextPhaseGroupID++;
 
 			core.mPhaseGroupToMaterialHandle.pushBack(materialHandle);
+			PxU16* foundHandle = core.mUniqueMaterialHandles.find(materialHandle);
+			if(foundHandle == core.mUniqueMaterialHandles.end())
+			{
+				core.mUniqueMaterialHandles.pushBack(materialHandle);
+			}
 
 			if (mCore.getSim())
 				mCore.getSim()->getLowLevelParticleSystem()->mFlag |= Dy::ParticleSystemFlag::eUPDATE_PHASE;
@@ -849,6 +865,12 @@ namespace physx
 	PX_CATCH_UNDEFINED_ENABLE_DEBUG_VISUALIZATION
 #endif
 
+    PxU32 NpFLIPParticleSystem::getParticleMaterials(PxParticleMaterial** userBuffer, PxU32 bufferSize,
+                                                    PxU32 startIndex) const
+    {
+	    return getParticleMaterialsInternal<NpFLIPMaterial>(userBuffer, bufferSize, startIndex);
+    }
+
 	void NpFLIPParticleSystem::addParticleBuffer(PxParticleBuffer* particleBuffer)
 	{
 		NP_WRITE_CHECK(getNpScene());
@@ -901,6 +923,11 @@ namespace physx
 			const PxU32 groupID = mNextPhaseGroupID++;
 
 			core.mPhaseGroupToMaterialHandle.pushBack(materialHandle);
+			PxU16* foundHandle = core.mUniqueMaterialHandles.find(materialHandle);
+			if(foundHandle == core.mUniqueMaterialHandles.end())
+			{
+				core.mUniqueMaterialHandles.pushBack(materialHandle);
+			}
 
 			if (mCore.getSim())
 				mCore.getSim()->getLowLevelParticleSystem()->mFlag |= Dy::ParticleSystemFlag::eUPDATE_PHASE;
@@ -985,6 +1012,12 @@ namespace physx
 	PX_CATCH_UNDEFINED_ENABLE_DEBUG_VISUALIZATION
 #endif
 
+	PxU32 NpMPMParticleSystem::getParticleMaterials(PxParticleMaterial** userBuffer, PxU32 bufferSize,
+                                                     PxU32 startIndex) const
+    {
+	    return getParticleMaterialsInternal<NpMPMMaterial>(userBuffer, bufferSize, startIndex);
+    }
+
 	void NpMPMParticleSystem::addParticleBuffer(PxParticleBuffer* particleBuffer)
 	{
 		NP_WRITE_CHECK(getNpScene());
@@ -1032,131 +1065,6 @@ namespace physx
 		PX_CHECK_SCENE_API_WRITE_FORBIDDEN(getNpScene(), "NpMPMParticleSystem::removeRigidAttachment: Illegal to call while simulation is running.");
 
 		internalRemoveRigidAttachment(actor, mCore);
-	}
-
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	NpCustomParticleSystem::NpCustomParticleSystem(PxCudaContextManager& cudaContextManager, PxU32 maxNeighborhood) :
-		NpParticleSystem<PxCustomParticleSystem>(cudaContextManager, PxConcreteType::eCUSTOM_PARTICLESYSTEM, NpType::eCUSTOM_PARTICLESYSTEM, PxActorType::eCUSTOM_PARTICLESYSTEM)
-	{
-		//PX_ASSERT(mCudaContextManager);
-		setSolverType(PxParticleSolverType::eCUSTOM);
-		mCore.getShapeCore().initializeLLCoreData(maxNeighborhood);
-		enableCCD(false);
-	}
-
-	void NpCustomParticleSystem::release()
-	{
-		NpScene* npScene = getNpScene();
-		NP_WRITE_CHECK(npScene);
-
-		//	NpPhysics::getInstance().notifyDeletionListenersUserRelease(this, PxArticulationBase::userData);
-
-		if (npScene)
-		{
-			npScene->scRemoveParticleSystem(*this);
-			npScene->removeFromParticleSystemList(*this);
-		}
-
-		PX_ASSERT(!isAPIWriteForbidden());
-		NpDestroyParticleSystem(this);
-	}
-
-	void NpCustomParticleSystem::getSparseGridCoord(PxI32& x, PxI32& y, PxI32& z, PxU32 id)
-	{
-		const PxI32 iid = static_cast<PxI32>(id);
-		x = iid % MAX_SPARSEGRID_DIM + MIN_SPARSEGRID_ID;
-		y = (iid / MAX_SPARSEGRID_DIM) % MAX_SPARSEGRID_DIM + MIN_SPARSEGRID_ID;
-		z = iid / MAX_SPARSEGRID_DIM / MAX_SPARSEGRID_DIM + MIN_SPARSEGRID_ID;
-	}
-
-	void* NpCustomParticleSystem::getSparseGridDataPointer(PxSparseGridDataFlag::Enum flags)
-	{
-		if ((flags & (PxSparseGridDataFlag::eSUBGRID_MASK | PxSparseGridDataFlag::eSUBGRID_ID
-			| PxSparseGridDataFlag::eGRIDCELL_SOLID_GRADIENT_AND_SDF | PxSparseGridDataFlag::eGRIDCELL_SOLID_VELOCITY
-			| PxSparseGridDataFlag::eGRIDCELL_FLUID_SDF | PxSparseGridDataFlag::eGRIDCELL_FLUID_VELOCITY
-			)) == 0)
-		{
-			PxGetFoundation().error(PxErrorCode::eINVALID_OPERATION, PX_FL, "PxParticleSystem::copySparseGridData, specified data is not available.");
-			return NULL;
-		}
-
-		NP_READ_CHECK(getNpScene());
-
-		NpScene* scene = getNpScene();
-		return scene->getSimulationController()->getSparseGridDataPointer(*getCore().getSim()->getLowLevelParticleSystem(), flags, getCore().getSolverType());
-	}
-
-#if PX_ENABLE_DEBUG_VISUALIZATION
-	void NpCustomParticleSystem::visualize(PxRenderOutput& out, NpScene& npScene)	const
-	{
-		visualizeParticleSystem(out, npScene, mCore);
-	}
-#else
-	PX_CATCH_UNDEFINED_ENABLE_DEBUG_VISUALIZATION
-#endif
-
-	void NpCustomParticleSystem::addParticleBuffer(PxParticleBuffer* particleBuffer)
-	{
-		NP_WRITE_CHECK(getNpScene());
-		PX_CHECK_AND_RETURN(getNpScene() != NULL, "NpCustomParticleSystem::addParticleBuffer: this function cannot be called when the particle system is not inserted into the scene!");
-
-		if (particleBuffer->getConcreteType() == PxConcreteType::ePARTICLE_BUFFER)
-		{
-			mCore.getShapeCore().addParticleBuffer(particleBuffer);
-		}
-		else
-		{
-			PxGetFoundation().error(PxErrorCode::eINVALID_PARAMETER, PX_FL, "NpCustomParticleSystem:addParticleBuffer(): the provided buffer type is not supported by this type of particle system.");
-		}
-	}
-
-	void NpCustomParticleSystem::removeParticleBuffer(PxParticleBuffer* particleBuffer)
-	{
-		if (particleBuffer->getConcreteType() == PxConcreteType::ePARTICLE_BUFFER)
-		{
-			mCore.getShapeCore().removeParticleBuffer(particleBuffer);
-		}
-		else
-		{
-			PxGetFoundation().error(PxErrorCode::eINVALID_PARAMETER, PX_FL, "NpCustomParticleSystem:addParticleBuffer(): the provided buffer type is not supported by this type of particle system.");
-		}
-	}
-
-	PxU32 NpCustomParticleSystem::createPhase(PxParticleMaterial* material, const PxParticlePhaseFlags flags)
-	{
-		if (material->getConcreteType() == PxConcreteType::eCUSTOM_MATERIAL)
-		{
-			Sc::ParticleSystemShapeCore& shapeCore = mCore.getShapeCore();
-			Dy::ParticleSystemCore& core = shapeCore.getLLCore();
-
-			PxU16 materialHandle = static_cast<NpCustomMaterial*>(material)->mMaterial.mMaterialIndex;
-
-			const PxU32 groupID = mNextPhaseGroupID++;
-
-			core.mPhaseGroupToMaterialHandle.pushBack(materialHandle);
-
-			if (mCore.getSim())
-				mCore.getSim()->getLowLevelParticleSystem()->mFlag |= Dy::ParticleSystemFlag::eUPDATE_PHASE;
-
-			return (groupID & PxParticlePhaseFlag::eParticlePhaseGroupMask)
-				| (PxU32(flags) & PxParticlePhaseFlag::eParticlePhaseFlagsMask);
-		}
-		else
-		{
-			PxGetFoundation().error(PxErrorCode::eINVALID_PARAMETER, PX_FL, "PxCustomParticleSystem:createPhase(): the provided material is not supported by this type of particle system.");
-			return 0;
-		}
-	}
-
-	void NpCustomParticleSystem::setCustomParticleCallback(PxCustomParticleSystemSolverCallback* callback)
-	{
-		mCore.setParticleSystemSolverCallback(callback);
-	}
-	PxCustomParticleSystemSolverCallback*
-		NpCustomParticleSystem::getCustomParticleCallback() const
-	{
-		return mCore.getParticleSystemSolverCallback();
 	}
 #endif
 

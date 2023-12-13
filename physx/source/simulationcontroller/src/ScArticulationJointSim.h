@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -40,14 +40,13 @@ namespace Sc
 
 	class ArticulationJointSim : public Interaction
 	{
-		ArticulationJointSim&	operator=(const ArticulationJointSim &);
-
+		PX_NOCOPY(ArticulationJointSim)
 	public:
 												ArticulationJointSim(ArticulationJointCore& joint, ActorSim& parent, ActorSim& child);
 												~ArticulationJointSim();
 
-						bool					onActivate_(void*);
-						bool					onDeactivate_();
+						bool					onActivate(void*);
+						bool					onDeactivate();
 
 		PX_FORCE_INLINE	ArticulationJointCore&	getCore()	const	{ return mCore; }
 
@@ -55,10 +54,6 @@ namespace Sc
 						BodySim&				getChild()	const;
 
 						void					setDirty();
-
-		//---------------------------------------------------------------------------------
-		// Low Level data access
-		//---------------------------------------------------------------------------------
 	private:
 						ArticulationJointCore&	mCore;
 	};

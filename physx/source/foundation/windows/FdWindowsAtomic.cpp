@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.
 
@@ -79,10 +79,7 @@ PxI32 PxAtomicMax(volatile PxI32* val, PxI32 val2)
 	{
 		oldValue = *val;
 
-		if(val2 > oldValue)
-			newValue = val2;
-		else
-			newValue = oldValue;
+		newValue = val2 > oldValue ? val2 : oldValue;
 
 	} while(InterlockedCompareExchange((volatile LONG*)val, newValue, oldValue) != oldValue);
 

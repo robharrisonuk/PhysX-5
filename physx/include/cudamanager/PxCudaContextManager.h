@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 
 #ifndef PX_CUDA_CONTEXT_MANAGER_H
 #define PX_CUDA_CONTEXT_MANAGER_H
@@ -43,23 +43,6 @@ namespace physx
 #endif
 
 class PxCudaContext;
-
-/** \brief Possible graphic/CUDA interoperability modes for context */
-struct PxCudaInteropMode
-{
-    /**
-     * \brief Possible graphic/CUDA interoperability modes for context
-     */
-	enum Enum
-	{
-		NO_INTEROP = 0,
-		D3D10_INTEROP,
-		D3D11_INTEROP,
-		OGL_INTEROP,
-
-		COUNT
-	};
-};
 
 struct PxCudaInteropRegisterFlag
 {
@@ -156,21 +139,11 @@ public:
 	  */
 	PxDeviceAllocatorCallback*	deviceAllocator;
 
-	/**
-     * \brief The CUDA/Graphics interop mode of this context
-     *
-     * If ctx is NULL, this value describes the nature of the graphicsDevice
-     * pointer provided by the user.  Else it describes the nature of the
-     * context provided by the user.
-     */
-	PxCudaInteropMode::Enum interopMode;
-
 	PX_INLINE PxCudaContextManagerDesc() :
 		ctx				(NULL),
 		graphicsDevice	(NULL),
 		appGUID			(NULL),
-		deviceAllocator	(NULL),
-		interopMode		(PxCudaInteropMode::NO_INTEROP)
+		deviceAllocator	(NULL)
 	{
 	}
 };
@@ -264,6 +237,22 @@ public:
 	}
 
 	/**
+	* \brief Schedules a memset operation on the device on the specified stream. Only supported for 1 byte or 4 byte data types.
+	*
+	* The cuda context will get acquired automatically
+	*/
+	template<typename T>
+	void memsetAsync(T* dstDeviceBuffer, const T& value, PxU32 numElements, CUstream stream)
+	{
+		PX_COMPILE_TIME_ASSERT(sizeof(value) == sizeof(PxU32) || sizeof(value) == sizeof(PxU8));		
+
+		if (sizeof(value) == sizeof(PxU32))		
+			memsetD32AsyncInternal(dstDeviceBuffer, reinterpret_cast<const PxU32&>(value), numElements, stream);
+		else
+			memsetD8AsyncInternal(dstDeviceBuffer, reinterpret_cast<const PxU8&>(value), numElements, stream);		
+	}
+
+	/**
 	* \brief Allocates a device buffer
 	*
 	* The cuda context will get acquired automatically
@@ -271,7 +260,7 @@ public:
 	template<typename T>
 	void allocDeviceBuffer(T*& deviceBuffer, PxU32 numElements, const char* filename = __FILE__, PxI32 line = __LINE__)
 	{
-		void* ptr = allocDeviceBufferInternal(numElements * sizeof(T), filename, line);
+		void* ptr = allocDeviceBufferInternal(PxU64(numElements) * sizeof(T), filename, line);
 		deviceBuffer = reinterpret_cast<T*>(ptr);
 	}
 
@@ -283,7 +272,7 @@ public:
 	template<typename T>
 	T* allocDeviceBuffer(PxU32 numElements, const char* filename = __FILE__, PxI32 line = __LINE__)
 	{
-		void* ptr = allocDeviceBufferInternal(numElements * sizeof(T), filename, line);
+		void* ptr = allocDeviceBufferInternal(PxU64(numElements) * sizeof(T), filename, line);
 		return reinterpret_cast<T*>(ptr);
 	}
 
@@ -309,7 +298,7 @@ public:
 	template<typename T>
 	void allocPinnedHostBuffer(T*& pinnedHostBuffer, PxU32 numElements, const char* filename = __FILE__, PxI32 line = __LINE__)
 	{
-		void* ptr = allocPinnedHostBufferInternal(numElements * sizeof(T), filename, line);
+		void* ptr = allocPinnedHostBufferInternal(PxU64(numElements) * sizeof(T), filename, line);
 		pinnedHostBuffer = reinterpret_cast<T*>(ptr);
 	}
 
@@ -323,7 +312,7 @@ public:
 	template<typename T>
 	T* allocPinnedHostBuffer(PxU32 numElements, const char* filename = __FILE__, PxI32 line = __LINE__)
 	{
-		void* ptr = allocPinnedHostBufferInternal(numElements * sizeof(T), filename, line);
+		void* ptr = allocPinnedHostBufferInternal(PxU64(numElements) * sizeof(T), filename, line);
 		return reinterpret_cast<T*>(ptr);
 	}
 
@@ -409,64 +398,12 @@ public:
 	virtual unsigned int getMaxThreadsPerBlock() const = 0; //!< returns the maximum number of threads per block
     virtual const char *getDeviceName() const = 0; //!< returns device name retrieved from driver
 	virtual CUdevice getDevice() const = 0; //!< returns device handle retrieved from driver
-	virtual PxCudaInteropMode::Enum getInteropMode() const = 0; //!< interop mode the context was created with
 
 	virtual void setUsingConcurrentStreams(bool) = 0; //!< turn on/off using concurrent streams for GPU work
 	virtual bool getUsingConcurrentStreams() const = 0; //!< true if GPU work can run in concurrent streams
     /* End query methods that don't require context to be acquired */
 
-    /**
-     * \brief Register a rendering resource with CUDA
-     *
-     * This function is called to register render resources (allocated
-     * from OpenGL) with CUDA so that the memory may be shared
-     * between the two systems.  This is only required for render
-     * resources that are designed for interop use.  In APEX, each
-     * render resource descriptor that could support interop has a
-     * 'registerInCUDA' boolean variable.
-     *
-     * The function must be called again any time your graphics device
-     * is reset, to re-register the resource.
-     *
-     * Returns true if the registration succeeded.  A registered
-     * resource must be unregistered before it can be released.
-     *
-     * \param resource [OUT] the handle to the resource that can be used with CUDA
-     * \param buffer [IN] GLuint buffer index to be mapped to cuda
-     * \param flags [IN] cuda interop registration flags
-     */
-    virtual bool registerResourceInCudaGL(CUgraphicsResource& resource, uint32_t buffer, PxCudaInteropRegisterFlags flags = PxCudaInteropRegisterFlags()) = 0;
-
-     /**
-     * \brief Register a rendering resource with CUDA
-     *
-     * This function is called to register render resources (allocated
-     * from Direct3D) with CUDA so that the memory may be shared
-     * between the two systems.  This is only required for render
-     * resources that are designed for interop use.  In APEX, each
-     * render resource descriptor that could support interop has a
-     * 'registerInCUDA' boolean variable.
-     *
-     * The function must be called again any time your graphics device
-     * is reset, to re-register the resource.
-     *
-     * Returns true if the registration succeeded.  A registered
-     * resource must be unregistered before it can be released.
-     *
-     * \param resource [OUT] the handle to the resource that can be used with CUDA
-     * \param resourcePointer [IN] A pointer to either IDirect3DResource9, or ID3D10Device, or ID3D11Resource to be registered.
-     * \param flags [IN] cuda interop registration flags
-     */
-    virtual bool registerResourceInCudaD3D(CUgraphicsResource& resource, void* resourcePointer, PxCudaInteropRegisterFlags flags = PxCudaInteropRegisterFlags()) = 0;
-
-    /**
-     * \brief Unregister a rendering resource with CUDA
-     *
-     * If a render resource was successfully registered with CUDA using
-     * the registerResourceInCuda***() methods, this function must be called
-     * to unregister the resource before the it can be released.
-     */
-    virtual bool unregisterResourceInCuda(CUgraphicsResource resource) = 0;
+	virtual void getDeviceMemoryInfo(size_t& free, size_t& total) const = 0; //!< get currently available and total memory
 
 	/**
 	 * \brief Determine if the user has configured a dedicated PhysX GPU in the NV Control Panel
@@ -502,8 +439,8 @@ protected:
      */
     virtual ~PxCudaContextManager() {}
 	
-	virtual void* allocDeviceBufferInternal(PxU32 numBytes, const char* filename = NULL, PxI32 line = -1) = 0;	
-	virtual void* allocPinnedHostBufferInternal(PxU32 numBytes, const char* filename = NULL, PxI32 line = -1) = 0;
+	virtual void* allocDeviceBufferInternal(PxU64 numBytes, const char* filename = NULL, PxI32 line = -1) = 0;	
+	virtual void* allocPinnedHostBufferInternal(PxU64 numBytes, const char* filename = NULL, PxI32 line = -1) = 0;
 	
 	virtual void freeDeviceBufferInternal(void* deviceBuffer) = 0;	
 	virtual void freePinnedHostBufferInternal(void* pinnedHostBuffer) = 0;	 
@@ -516,14 +453,17 @@ protected:
 	 
 	virtual void copyDToHInternal(void* hostBuffer, const void* deviceBuffer, PxU32 numBytes) = 0;
 	virtual void copyHToDInternal(void* deviceBuffer, const void* hostBuffer, PxU32 numBytes) = 0;
+
+	virtual void memsetD8AsyncInternal(void* dstDeviceBuffer, const PxU8& value, PxU32 numBytes, CUstream stream) = 0;
+	virtual void memsetD32AsyncInternal(void* dstDeviceBuffer, const PxU32& value, PxU32 numIntegers, CUstream stream) = 0;
 };
 
-#define PX_DEVICE_ALLOC(cudaContextManager, deviceBuffer, numElements) cudaContextManager->allocDeviceBuffer(deviceBuffer, numElements, __FILE__, __LINE__)
-#define PX_DEVICE_ALLOC_T(T, cudaContextManager, numElements) cudaContextManager->allocDeviceBuffer<T>(numElements, __FILE__, __LINE__)
+#define PX_DEVICE_ALLOC(cudaContextManager, deviceBuffer, numElements) cudaContextManager->allocDeviceBuffer(deviceBuffer, numElements, PX_FL)
+#define PX_DEVICE_ALLOC_T(T, cudaContextManager, numElements) cudaContextManager->allocDeviceBuffer<T>(numElements, PX_FL)
 #define PX_DEVICE_FREE(cudaContextManager, deviceBuffer) cudaContextManager->freeDeviceBuffer(deviceBuffer);
 
-#define PX_PINNED_HOST_ALLOC(cudaContextManager, pinnedHostBuffer, numElements) cudaContextManager->allocPinnedHostBuffer(pinnedHostBuffer, numElements, __FILE__, __LINE__)
-#define PX_PINNED_HOST_ALLOC_T(T, cudaContextManager, numElements) cudaContextManager->allocPinnedHostBuffer<T>(numElements, __FILE__, __LINE__)
+#define PX_PINNED_HOST_ALLOC(cudaContextManager, pinnedHostBuffer, numElements) cudaContextManager->allocPinnedHostBuffer(pinnedHostBuffer, numElements, PX_FL)
+#define PX_PINNED_HOST_ALLOC_T(T, cudaContextManager, numElements) cudaContextManager->allocPinnedHostBuffer<T>(numElements, PX_FL)
 #define PX_PINNED_HOST_FREE(cudaContextManager, pinnedHostBuffer) cudaContextManager->freePinnedHostBuffer(pinnedHostBuffer);
 
 /**

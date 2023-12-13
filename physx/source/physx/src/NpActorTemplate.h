@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -33,7 +33,7 @@
 #include "NpActor.h"
 #include "NpScene.h"
 
-#include "omnipvd/OmniPvdPxSampler.h"
+#include "omnipvd/NpOmniPvdSetData.h"
 
 namespace physx
 {
@@ -52,12 +52,6 @@ See comments for PX_BINARY_SERIAL_VERSION.
 template<class APIClass>
 class NpActorTemplate : public APIClass, public NpActor
 {
-//= ATTENTION! =====================================================================================
-// Changing the data layout of this class breaks the binary serialization format.  See comments for 
-// PX_BINARY_SERIAL_VERSION.  If a modification is required, please adjust the getBinaryMetaData 
-// function.  If the modification is made on a custom branch, please change PX_BINARY_SERIAL_VERSION
-// accordingly.
-//==================================================================================================
 	PX_NOCOPY(NpActorTemplate)
 public:
 // PX_SERIALIZATION
@@ -178,7 +172,7 @@ void NpActorTemplate<APIClass>::setOwnerClient( PxClientID inId )
 {
 	if ( getNpScene() != NULL )
 	{
-		PxGetFoundation().error(PxErrorCode::eINVALID_OPERATION, __FILE__, __LINE__, 
+		PxGetFoundation().error(PxErrorCode::eINVALID_OPERATION, PX_FL, 
 				"Attempt to set the client id when an actor is already in a scene.");
 	}
 	else
@@ -207,6 +201,7 @@ template<class APIClass>
 PX_FORCE_INLINE void NpActorTemplate<APIClass>::setActorFlagsInternal(PxActorFlags inFlags)
 {
 	NpActor::scSetActorFlags(inFlags);
+	OMNI_PVD_SET(OMNI_PVD_CONTEXT_HANDLE, PxActor, flags, static_cast<PxActor&>(*this), inFlags)
 }
 
 template<class APIClass>

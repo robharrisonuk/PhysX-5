@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -38,6 +38,15 @@
 namespace physx
 {
 #endif
+
+	struct PxFEMSoftBodyMaterialModel
+	{
+		enum Enum
+		{
+			eCO_ROTATIONAL,   //!< Default model. Well suited for high stiffness. Does need tetrahedra with good shapes (no extreme slivers) in the rest pose.
+			eNEO_HOOKEAN      //!< Well suited for lower stiffness. Robust to any tetrahedron shape.
+		};
+	};
 
 	class PxScene;
 	/**
@@ -83,13 +92,30 @@ namespace physx
 		*/
 		virtual		PxReal	getDampingScale() const = 0;
 
+		/**
+		\brief Sets the material model.
+
+		\param[in] model The material model
+
+		@see getMaterialModel
+		*/
+		virtual		void	setMaterialModel(PxFEMSoftBodyMaterialModel::Enum model) = 0;
+		
+		/**
+		\brief Retrieves the material model.
+		\return The material model.
+
+		@see setMaterialModel()
+		*/
+		virtual		PxFEMSoftBodyMaterialModel::Enum getMaterialModel() const = 0;
+
 		virtual		const char*		getConcreteTypeName() const { return "PxFEMSoftBodyMaterial"; }
 
 	protected:
 		PX_INLINE			PxFEMSoftBodyMaterial(PxType concreteType, PxBaseFlags baseFlags) : PxFEMMaterial(concreteType, baseFlags) {}
 		PX_INLINE			PxFEMSoftBodyMaterial(PxBaseFlags baseFlags) : PxFEMMaterial(baseFlags) {}
 		virtual				~PxFEMSoftBodyMaterial() {}
-		virtual		bool	isKindOf(const char* name) const { return !::strcmp("PxFEMSoftBodyMaterial", name) || PxFEMMaterial::isKindOf(name); }
+		virtual		bool	isKindOf(const char* name) const { PX_IS_KIND_OF(name, "PxFEMSoftBodyMaterial", PxFEMMaterial); }
 	};
 
 #if !PX_DOXYGEN

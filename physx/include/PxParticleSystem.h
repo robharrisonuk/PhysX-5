@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -36,6 +36,7 @@
 #include "PxActor.h"
 #include "PxFiltering.h"
 #include "PxParticleSystemFlag.h"
+#include "foundation/PxArray.h"
 
 #include "cudamanager/PxCudaTypes.h"
 
@@ -107,6 +108,69 @@ public:
 	\brief Destructor
 	*/
 	virtual ~PxParticleSystemCallback() {}
+};
+
+/**
+\brief Special callback that forwards calls to arbitrarily many sub-callbacks
+*/
+class PxMultiCallback : public PxParticleSystemCallback
+{
+private:
+	PxArray<PxParticleSystemCallback*> mCallbacks;
+
+public:
+	PxMultiCallback() : mCallbacks(0) {}
+
+	virtual void onPostSolve(const PxGpuMirroredPointer<PxGpuParticleSystem>& gpuParticleSystem, CUstream stream) PX_OVERRIDE
+	{
+		for (PxU32 i = 0; i < mCallbacks.size(); ++i)
+			mCallbacks[i]->onPostSolve(gpuParticleSystem, stream);
+	}
+
+	virtual void onBegin(const PxGpuMirroredPointer<PxGpuParticleSystem>& gpuParticleSystem, CUstream stream) PX_OVERRIDE
+	{
+		for (PxU32 i = 0; i < mCallbacks.size(); ++i)
+			mCallbacks[i]->onBegin(gpuParticleSystem, stream);
+	}
+
+	virtual void onAdvance(const PxGpuMirroredPointer<PxGpuParticleSystem>& gpuParticleSystem, CUstream stream) PX_OVERRIDE
+	{
+		for (PxU32 i = 0; i < mCallbacks.size(); ++i)
+			mCallbacks[i]->onAdvance(gpuParticleSystem, stream);
+	}
+
+	/**
+	\brief Adds a callback
+
+	\param[in] callback The callback to add
+	\return True if the callback was added
+	*/
+	bool addCallback(PxParticleSystemCallback* callback)
+	{
+		if (mCallbacks.find(callback) != mCallbacks.end())
+			return false;
+		mCallbacks.pushBack(callback);
+		return true;
+	}
+
+	/**
+	\brief Removes a callback
+
+	\param[in] callback The callback to remove
+	\return True if the callback was removed
+	*/
+	bool removeCallback(const PxParticleSystemCallback* callback)
+	{
+		for (PxU32 i = 0; i < mCallbacks.size(); ++i)
+		{
+			if (mCallbacks[i] == callback)
+			{
+				mCallbacks.remove(i);
+				return true;
+			}
+		}
+		return false;
+	}
 };
 
 /**
@@ -364,11 +428,16 @@ public:
 	
 	
 	/**
-	\brief Returns number of particle materials
+	\brief Returns number of particle materials referenced by particle phases
 	\return The number of particle materials
 	*/
 	virtual     PxU32               getNbParticleMaterials() const = 0;
 
+	/**
+	\brief Returns particle materials referenced by particle phases
+	\return The particle materials
+	*/
+	virtual     PxU32               getParticleMaterials(PxParticleMaterial** userBuffer, PxU32 bufferSize, PxU32 startIndex = 0) const = 0;
 
 	/**
 	\brief Sets a user notify object which receives special simulation events when they occur.
@@ -391,22 +460,6 @@ public:
 	virtual     PxParticleSystemCallback*   getParticleSystemCallback() const = 0;
 
 	/**
-	\brief Sets periodic boundary wrap value
-	\param[in] boundary The periodic boundary wrap value
-
-	See #getPeriodicBoundary()
-	*/
-	virtual     void                setPeriodicBoundary(const PxVec3& boundary) = 0;
-
-	/**
-	\brief Gets periodic boundary wrap value
-	\return  boundary The periodic boundary wrap value
-
-	See #setPeriodicBoundary()
-	*/
-	virtual     PxVec3              getPeriodicBoundary() const = 0;
-
-	/**
 	\brief Add an existing particle buffer to the particle system.
 	\param[in] particleBuffer a PxParticleBuffer*.
 
@@ -424,7 +477,7 @@ public:
 
 	/**
 	\brief Returns the GPU particle system index.
-	\return The GPU index, if the particle system is in a scene and PxSceneFlag::eSUPPRESS_READBACK is set, or 0xFFFFFFFF otherwise.
+	\return The GPU index, if the particle system is in a scene and PxSceneFlag::eENABLE_DIRECT_GPU_API is set, or 0xFFFFFFFF otherwise.
 	*/
 	virtual     PxU32               getGpuParticleSystemIndex() = 0;
 
@@ -434,7 +487,7 @@ protected:
 
 	PX_INLINE                       PxParticleSystem(PxType concreteType, PxBaseFlags baseFlags) : PxActor(concreteType, baseFlags) {}
 	PX_INLINE                       PxParticleSystem(PxBaseFlags baseFlags) : PxActor(baseFlags) {}
-	virtual     bool                isKindOf(const char* name) const PX_OVERRIDE { return !::strcmp("PxParticleSystem", name) || PxActor::isKindOf(name); }
+	virtual     bool                isKindOf(const char* name) const PX_OVERRIDE { PX_IS_KIND_OF(name, "PxParticleSystem", PxActor); }
 };
 
 

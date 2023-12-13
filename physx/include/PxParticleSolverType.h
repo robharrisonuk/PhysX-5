@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -53,8 +53,7 @@ struct PxParticleSolverType
 	{
 		ePBD = 1 << 0,			//!< The position based dynamics solver that can handle fluid, granular material, cloth, inflatables etc. See #PxPBDParticleSystem.
 		eFLIP = 1 << 1,			//!< The FLIP fluid solver. See #PxFLIPParticleSystem.
-		eMPM = 1 << 2,			//!< The MPM (material point method) solver that can handle a variety of materials. See #PxMPMParticleSystem.
-		eCUSTOM = 1 << 3		//!< Custom solver. The user needs to specify the interaction of the particle by providing appropriate functions. Can be used e.g. for molecular dynamics simulations. See #PxCustomParticleSystem.
+		eMPM = 1 << 2			//!< The MPM (material point method) solver that can handle a variety of materials. See #PxMPMParticleSystem.
 	};
 };
 

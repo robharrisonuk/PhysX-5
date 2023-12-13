@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -40,18 +40,9 @@ namespace physx
 struct PxcNpWorkUnit;
 struct PxsContactManagerOutput;
 
-namespace Cm
-{
-	class SpatialVector;
-}
-
-struct PxSolverBody;
-struct PxSolverBodyData;
-
 namespace Dy
 {
 class FeatherstoneArticulation;
-struct FsData;
 
 // dsequeira: moved this articulation stuff here to sever a build dep on Articulation.h through DyThreadContext.h and onward
 
@@ -93,10 +84,10 @@ enum Enum
 };
 };
 
-PX_FORCE_INLINE bool isArticulationConstraint(const PxSolverConstraintDesc& desc)
+PX_FORCE_INLINE bool	isArticulationConstraint(const PxSolverConstraintDesc& desc)
 {
-	return (desc.linkIndexA != PxSolverConstraintDesc::RIGID_BODY ) ||
-		(desc.linkIndexB != PxSolverConstraintDesc::RIGID_BODY);
+	return desc.linkIndexA != PxSolverConstraintDesc::RIGID_BODY
+		|| desc.linkIndexB != PxSolverConstraintDesc::RIGID_BODY;
 }
 
 

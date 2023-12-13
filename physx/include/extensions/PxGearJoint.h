@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -67,7 +67,7 @@ namespace physx
 		\brief Set the hinge/revolute joints connected by the gear joint.
 
 		The passed joints can be either PxRevoluteJoint, PxD6Joint or PxArticulationJointReducedCoordinate. 
-		The joints must define degrees of freedom around the twist axis. They cannot be null.
+		The joints must define degrees of freedom around the twist axis.
 
 		Note that these joints are only used to compute the positional error correction term,
 		used to adjust potential drift between jointed actors. The gear joint can run without
@@ -81,6 +81,14 @@ namespace physx
 		\return		true if success
 		*/
 		virtual	bool		setHinges(const PxBase* hinge0, const PxBase* hinge1)	= 0;
+
+		/**
+		\brief Get the hinge/revolute joints connected by the gear joint.
+
+		\param[out]	hinge0		The first hinge joint
+		\param[out]	hinge1		The second hinge joint
+		*/
+		virtual	void		getHinges(const PxBase*& hinge0, const PxBase*& hinge1)	const	= 0;
 
 		/**
 		\brief Set the desired gear ratio.
@@ -110,7 +118,7 @@ namespace physx
 
 		PX_INLINE			PxGearJoint(PxBaseFlags baseFlags) : PxJoint(baseFlags)	{}
 
-		virtual	bool		isKindOf(const char* name) const { return !::strcmp("PxGearJoint", name) || PxJoint::isKindOf(name);	}
+		virtual	bool		isKindOf(const char* name) const { PX_IS_KIND_OF(name, "PxGearJoint", PxJoint);	}
 	};
 
 #if !PX_DOXYGEN

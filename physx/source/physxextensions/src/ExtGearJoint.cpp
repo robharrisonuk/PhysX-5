@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -30,10 +30,14 @@
 #include "ExtConstraintHelper.h"
 #include "extensions/PxRevoluteJoint.h"
 #include "PxArticulationJointReducedCoordinate.h"
+
+#include "omnipvd/ExtOmniPvdSetData.h"
 //#include <stdio.h>
 
 using namespace physx;
 using namespace Ext;
+
+PX_IMPLEMENT_OUTPUT_ERROR
 
 GearJoint::GearJoint(const PxTolerancesScale& /*scale*/, PxRigidActor* actor0, const PxTransform& localFrame0, PxRigidActor* actor1, const PxTransform& localFrame1) :
 	GearJointT(PxJointConcreteType::eGEAR, actor0, localFrame0, actor1, localFrame1, "GearJointData")
@@ -51,49 +55,37 @@ bool GearJoint::setHinges(const PxBase* hinge0, const PxBase* hinge1)
 {
 	GearJointData* data = static_cast<GearJointData*>(mData);
 
-	if(!hinge0 || !hinge1)
+	if(hinge0)
 	{
-		PxGetFoundation().error(PxErrorCode::eINVALID_PARAMETER, __FILE__, __LINE__, "PxGearJoint::setHinges: cannot pass null pointers to this function.");
-		return false;
+		const PxType type0 = hinge0->getConcreteType();
+		if(type0 == PxConcreteType::eARTICULATION_JOINT_REDUCED_COORDINATE)
+		{
+			const PxArticulationJointReducedCoordinate* joint0 = static_cast<const PxArticulationJointReducedCoordinate*>(hinge0);
+			const PxArticulationJointType::Enum artiJointType = joint0->getJointType();
+			if(artiJointType != PxArticulationJointType::eREVOLUTE && artiJointType != PxArticulationJointType::eREVOLUTE_UNWRAPPED)
+				return outputError<PxErrorCode::eINVALID_PARAMETER>(__LINE__, "PxGearJoint::setHinges: passed joint must be either a revolute joint.");
+		}
+		else
+		{
+			if(type0 != PxJointConcreteType::eREVOLUTE && type0 != PxJointConcreteType::eD6)
+				return outputError<PxErrorCode::eINVALID_PARAMETER>(__LINE__, "PxGearJoint::setHinges: passed joint must be either a revolute joint or a D6 joint.");
+		}
 	}
 
-	const PxType type0 = hinge0->getConcreteType();
-	if(type0 == PxConcreteType::eARTICULATION_JOINT_REDUCED_COORDINATE)
+	if(hinge1)
 	{
-		const PxArticulationJointReducedCoordinate* joint0 = static_cast<const PxArticulationJointReducedCoordinate*>(hinge0);
-		const PxArticulationJointType::Enum artiJointType = joint0->getJointType();
-		if(artiJointType != PxArticulationJointType::eREVOLUTE && artiJointType != PxArticulationJointType::eREVOLUTE_UNWRAPPED)
+		const PxType type1 = hinge1->getConcreteType();
+		if(type1 == PxConcreteType::eARTICULATION_JOINT_REDUCED_COORDINATE)
 		{
-			PxGetFoundation().error(PxErrorCode::eINVALID_PARAMETER, __FILE__, __LINE__, "PxGearJoint::setHinges: passed joint must be either a revolute joint.");
-			return false;
+			const PxArticulationJointReducedCoordinate* joint1 = static_cast<const PxArticulationJointReducedCoordinate*>(hinge1);
+			const PxArticulationJointType::Enum artiJointType = joint1->getJointType();
+			if(artiJointType != PxArticulationJointType::eREVOLUTE && artiJointType != PxArticulationJointType::eREVOLUTE_UNWRAPPED)
+				return outputError<PxErrorCode::eINVALID_PARAMETER>(__LINE__, "PxGearJoint::setHinges: passed joint must be either a revolute joint.");
 		}
-	}
-	else
-	{
-		if(type0 != PxJointConcreteType::eREVOLUTE && type0 != PxJointConcreteType::eD6)
+		else
 		{
-			PxGetFoundation().error(PxErrorCode::eINVALID_PARAMETER, __FILE__, __LINE__, "PxGearJoint::setHinges: passed joint must be either a revolute joint or a D6 joint.");
-			return false;
-		}
-	}
-		
-	const PxType type1 = hinge1->getConcreteType();
-	if(type1 == PxConcreteType::eARTICULATION_JOINT_REDUCED_COORDINATE)
-	{
-		const PxArticulationJointReducedCoordinate* joint1 = static_cast<const PxArticulationJointReducedCoordinate*>(hinge1);
-		const PxArticulationJointType::Enum artiJointType = joint1->getJointType();
-		if(artiJointType != PxArticulationJointType::eREVOLUTE && artiJointType != PxArticulationJointType::eREVOLUTE_UNWRAPPED)
-		{
-			PxGetFoundation().error(PxErrorCode::eINVALID_PARAMETER, __FILE__, __LINE__, "PxGearJoint::setHinges: passed joint must be either a revolute joint.");
-			return false;
-		}
-	}
-	else
-	{
-		if(type1 != PxJointConcreteType::eREVOLUTE && type1 != PxJointConcreteType::eD6)
-		{
-			PxGetFoundation().error(PxErrorCode::eINVALID_PARAMETER, __FILE__, __LINE__, "PxGearJoint::setHinges: passed joint must be either a revolute joint or a D6 joint.");
-			return false;
+			if(type1 != PxJointConcreteType::eREVOLUTE && type1 != PxJointConcreteType::eD6)
+				return outputError<PxErrorCode::eINVALID_PARAMETER>(__LINE__, "PxGearJoint::setHinges: passed joint must be either a revolute joint or a D6 joint.");
 		}
 	}
 
@@ -104,11 +96,18 @@ bool GearJoint::setHinges(const PxBase* hinge0, const PxBase* hinge1)
 
 #if PX_SUPPORT_OMNI_PVD
 	const PxBase* joints[] ={ hinge0, hinge1 };
-	PxU32 jointsLength = sizeof(joints);
-	OMNI_PVD_SETB(joint, gearHinges, static_cast<PxJoint&>(*this), joints, jointsLength)
+	const PxU32 hingeCount = sizeof(joints) / sizeof(joints[0]);
+	OMNI_PVD_SET_ARRAY(OMNI_PVD_CONTEXT_HANDLE, PxGearJoint, hinges, static_cast<PxGearJoint&>(*this), joints, hingeCount)
 #endif
 		
 	return true;
+}
+
+void GearJoint::getHinges(const PxBase*& hinge0, const PxBase*& hinge1) const
+{
+	const GearJointData* data = static_cast<const GearJointData*>(mData);
+	hinge0 = data->hingeJoint0;
+	hinge1 = data->hingeJoint1;
 }
 
 void GearJoint::setGearRatio(float ratio)
@@ -117,9 +116,8 @@ void GearJoint::setGearRatio(float ratio)
 	data->gearRatio = ratio;
 	resetError();
 	markDirty();
-#if PX_SUPPORT_OMNI_PVD
-	OMNI_PVD_SET(joint, gearRatio, static_cast<PxJoint&>(*this), ratio)
-#endif
+
+	OMNI_PVD_SET(OMNI_PVD_CONTEXT_HANDLE, PxGearJoint, ratio, static_cast<PxGearJoint&>(*this), ratio)
 }
 
 float GearJoint::getGearRatio() const
@@ -221,11 +219,6 @@ void GearJoint::resetError()
 	mInitDone = false;
 }
 
-static void GearJointProject(const void* /*constantBlock*/, PxTransform& /*bodyAToWorld*/, PxTransform& /*bodyBToWorld*/, bool /*projectToA*/)
-{
-//	const GearJointData& data = *reinterpret_cast<const GearJointData*>(constantBlock);
-}
-
 static const bool gVizJointFrames = true;
 static const bool gVizGearAxes = false;
 
@@ -236,7 +229,7 @@ static void GearJointVisualize(PxConstraintVisualizer& viz, const void* constant
 		const GearJointData& data = *reinterpret_cast<const GearJointData*>(constantBlock);
 
 		// Visualize joint frames
-		PxTransform cA2w, cB2w;
+		PxTransform32 cA2w, cB2w;
 		joint::computeJointFrames(cA2w, cB2w, data, body0Transform, body1Transform);
 		if(gVizJointFrames)
 			viz.visualizeJointFrames(cA2w, cB2w);
@@ -264,7 +257,7 @@ static PxU32 GearJointSolverPrep(Px1DConstraint* constraints,
 {
 	const GearJointData& data = *reinterpret_cast<const GearJointData*>(constantBlock);
 
-	PxTransform cA2w, cB2w;
+	PxTransform32 cA2w, cB2w;
 	joint::ConstraintHelper ch(constraints, invMassScale, cA2w, cB2w, body0WorldOffset, data, bA2w, bB2w);
 
 	cA2wOut = cB2w.p;
@@ -292,7 +285,7 @@ static PxU32 GearJointSolverPrep(Px1DConstraint* constraints,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static PxConstraintShaderTable gGearJointShaders = { GearJointSolverPrep, GearJointProject, GearJointVisualize, PxConstraintFlag::eALWAYS_UPDATE };
+static PxConstraintShaderTable gGearJointShaders = { GearJointSolverPrep, GearJointVisualize, PxConstraintFlag::eALWAYS_UPDATE };
 
 PxConstraintSolverPrep GearJoint::getPrep()	const	{ return gGearJointShaders.solverPrep;  }
 
@@ -320,11 +313,16 @@ void GearJoint::resolveReferences(PxDeserializationContext& context)
 #if PX_SUPPORT_OMNI_PVD
 
 template<>
-void physx::Ext::omniPvdInitJoint<GearJoint>(GearJoint* joint)
+void physx::Ext::omniPvdInitJoint<GearJoint>(GearJoint& joint)
 {
-	PxJoint& j = static_cast<PxJoint&>(*joint);
-	OMNI_PVD_SET(joint, type, j, PxJointConcreteType::eGEAR)
-	OMNI_PVD_SET(joint, gearRatio, j, joint->getGearRatio())
+	OMNI_PVD_WRITE_SCOPE_BEGIN(pvdWriter, pvdRegData)
+
+	PxGearJoint& j = static_cast<PxGearJoint&>(joint);
+	OMNI_PVD_CREATE_EXPLICIT(pvdWriter, pvdRegData, OMNI_PVD_CONTEXT_HANDLE, PxGearJoint, j);
+	omniPvdSetBaseJointParams(static_cast<PxJoint&>(joint), PxJointConcreteType::eGEAR);
+	OMNI_PVD_SET_EXPLICIT(pvdWriter, pvdRegData, OMNI_PVD_CONTEXT_HANDLE, PxGearJoint, ratio, j , joint.getGearRatio())
+
+	OMNI_PVD_WRITE_SCOPE_END
 }
 
 #endif

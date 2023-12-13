@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -117,12 +117,12 @@ namespace Gu
 	{
 		PxTriangle							mHitTriangle;
 		ConvexHullV							mConvexHull;
-		physx::aos::PxMatTransformV	mMeshToConvex;
-		physx::aos::PxTransformV	mConvexPoseV;
+		physx::aos::PxMatTransformV			mMeshToConvex;
+		physx::aos::PxTransformV			mConvexPoseV;
 		const Cm::FastVertex2ShapeScaling&	mMeshScale;
 		PxGeomSweepHit						mSweepHit; // stores either the closest or any hit depending on value of mAnyHit
-		physx::aos::FloatV			mInitialDistance;
-		physx::aos::Vec3V			mConvexSpaceDir; // convexPose.rotateInv(-unit*distance)
+		physx::aos::FloatV					mInitialDistance;
+		physx::aos::Vec3V					mConvexSpaceDir; // convexPose.rotateInv(-unit*distance)
 		PxVec3								mUnitDir;
 		PxVec3								mMeshSpaceUnitDir;
 		PxReal								mInflation;

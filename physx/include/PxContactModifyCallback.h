@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -133,7 +133,8 @@ public:
 	/**
 	\brief Alter the target velocity of a specific contact point in the set.
 	\param[in] i Index of the point in the set
-	\param[in] v The new velocity in world frame
+	\param[in] v The new velocity in world frame as seen from the second actor in the contact pair, i.e., the solver will try to achieve targetVel == (vel1 - vel2)
+	\note The sign of the velocity needs to be flipped depending on the order of the actors in the pair. There is no guarantee about the consistency of the order from frame to frame.
 
 	@see PxModifiableContact.targetVelocity
 	*/
@@ -289,7 +290,7 @@ public:
 	PX_FORCE_INLINE		PxReal getInvMassScale0() const					
 	{ 
 		PxContactPatch* patch = getPatch();
-		return patch->mMassModification.mInvMassScale0;
+		return patch->mMassModification.linear0;
 	}
 
 	/**
@@ -301,7 +302,7 @@ public:
 	PX_FORCE_INLINE		PxReal getInvMassScale1() const					
 	{ 
 		PxContactPatch* patch = getPatch();
-		return patch->mMassModification.mInvMassScale1;
+		return patch->mMassModification.linear1;
 	}
 
 	/**
@@ -313,7 +314,7 @@ public:
 	PX_FORCE_INLINE		PxReal getInvInertiaScale0() const					
 	{ 
 		PxContactPatch* patch = getPatch();
-		return patch->mMassModification.mInvInertiaScale0;
+		return patch->mMassModification.angular0;
 	}
 
 	/**
@@ -325,7 +326,7 @@ public:
 	PX_FORCE_INLINE		PxReal getInvInertiaScale1() const					
 	{ 
 		PxContactPatch* patch = getPatch();
-		return patch->mMassModification.mInvInertiaScale1;
+		return patch->mMassModification.angular1;
 	}
 
 	/**
@@ -338,7 +339,7 @@ public:
 	PX_FORCE_INLINE		void setInvMassScale0(const PxReal scale)					
 	{ 
 		PxContactPatch* patch = getPatch();
-		patch->mMassModification.mInvMassScale0 = scale;
+		patch->mMassModification.linear0 = scale;
 		patch->internalFlags |= PxContactPatch::eHAS_MODIFIED_MASS_RATIOS;
 	}
 
@@ -352,7 +353,7 @@ public:
 	PX_FORCE_INLINE		void setInvMassScale1(const PxReal scale)					
 	{ 
 		PxContactPatch* patch = getPatch();
-		patch->mMassModification.mInvMassScale1 = scale;
+		patch->mMassModification.linear1 = scale;
 		patch->internalFlags |= PxContactPatch::eHAS_MODIFIED_MASS_RATIOS;
 	}
 
@@ -366,7 +367,7 @@ public:
 	PX_FORCE_INLINE		void setInvInertiaScale0(const PxReal scale)					
 	{ 
 		PxContactPatch* patch = getPatch();
-		patch->mMassModification.mInvInertiaScale0 = scale;
+		patch->mMassModification.angular0 = scale;
 		patch->internalFlags |= PxContactPatch::eHAS_MODIFIED_MASS_RATIOS;
 	}
 
@@ -380,7 +381,7 @@ public:
 	PX_FORCE_INLINE		void setInvInertiaScale1(const PxReal scale)					
 	{ 
 		PxContactPatch* patch = getPatch();
-		patch->mMassModification.mInvInertiaScale1 = scale;
+		patch->mMassModification.angular1 = scale;
 		patch->internalFlags |= PxContactPatch::eHAS_MODIFIED_MASS_RATIOS;
 	}
 

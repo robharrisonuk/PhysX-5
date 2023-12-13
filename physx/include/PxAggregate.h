@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -186,15 +186,11 @@ public:
 	/**
 	\brief Retrieves max amount of actors that can be contained in the aggregate.
 
-	\note PxAggregate now supports an arbitrary number of actors. This method return PX_MAX_U32 and will be
-	removed in a future release.
-
 	\return Max actor size. 
 
 	@see PxPhysics::createAggregate()
-	@deprecated
 	*/
-	PX_DEPRECATED virtual	PxU32	getMaxNbActors() const = 0;
+	virtual	PxU32	getMaxNbActors() const = 0;
 
 	/**
 	\brief Retrieves max amount of shapes that can be contained in the aggregate.
@@ -243,7 +239,7 @@ protected:
 	PX_INLINE			PxAggregate(PxType concreteType, PxBaseFlags baseFlags) : PxBase(concreteType, baseFlags), userData(NULL)  {}
 	PX_INLINE			PxAggregate(PxBaseFlags baseFlags) : PxBase(baseFlags) {}
 	virtual				~PxAggregate() {}
-	virtual	bool		isKindOf(const char* name) const { return !::strcmp("PxAggregate", name) || PxBase::isKindOf(name); }
+	virtual	bool		isKindOf(const char* name) const { PX_IS_KIND_OF(name, "PxAggregate", PxBase); }
 };
 
 #if !PX_DOXYGEN

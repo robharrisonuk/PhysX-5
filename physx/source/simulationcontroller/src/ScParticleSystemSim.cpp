@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 
 #include "foundation/PxPreprocessor.h"
 
@@ -38,8 +38,7 @@ using namespace physx::Dy;
 
 Sc::ParticleSystemSim::ParticleSystemSim(ParticleSystemCore& core, Scene& scene) :
 	ActorSim(scene, core),
-	mShapeSim(*this, &core.getShapeCore()),
-	mNumCountedInteractions(0)
+	mShapeSim(*this, &core.getShapeCore())
 {
 	
 	mLLParticleSystem = scene.createLLParticleSystem(this);
@@ -99,13 +98,7 @@ void Sc::ParticleSystemSim::sleepCheck(PxReal dt)
 	PX_UNUSED(dt);
 }
 
-void Sc::ParticleSystemSim::setActive(const bool b, const PxU32 infoFlag)
-{
-	PX_UNUSED(b);
-	PX_UNUSED(infoFlag);
-}
-
-void Sc::ParticleSystemSim::activate()
+/*void Sc::ParticleSystemSim::activate()
 {
 	activateInteractions(*this);
 }
@@ -113,6 +106,6 @@ void Sc::ParticleSystemSim::activate()
 void Sc::ParticleSystemSim::deactivate()
 {
 	deactivateInteractions(*this);
-}
+}*/
 
 #endif //PX_SUPPORT_GPU_PHYSX

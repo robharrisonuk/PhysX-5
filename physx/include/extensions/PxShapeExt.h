@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -63,6 +63,7 @@ public:
 	*/
 	static PX_INLINE	PxTransform		getGlobalPose(const PxShape& shape, const PxRigidActor& actor)
 	{
+		// PT:: tag: scalar transform*transform
 		return actor.getGlobalPose() * shape.getLocalPose();
 	}
 
@@ -130,7 +131,6 @@ public:
 		return PxGeometryQuery::sweep(unitDir, distance, otherGeom, otherGeomPose, shape.getGeometry(), getGlobalPose(shape, actor), sweepHit, hitFlags);
 	}
 
-
 	/**
 	\brief Retrieves the axis aligned bounding box enclosing the shape.
 
@@ -144,7 +144,9 @@ public:
 	*/
 	static PX_INLINE PxBounds3		getWorldBounds(const PxShape& shape, const PxRigidActor& actor, float inflation=1.01f)
 	{
-		return PxGeometryQuery::getWorldBounds(shape.getGeometry(), getGlobalPose(shape, actor), inflation);
+		PxBounds3 bounds;
+		PxGeometryQuery::computeGeomBounds(bounds, shape.getGeometry(), getGlobalPose(shape, actor), 0.0f, inflation);
+		return bounds;
 	}
 
 };

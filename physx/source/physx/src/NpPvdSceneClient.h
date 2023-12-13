@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.
 
@@ -75,7 +75,6 @@ class NpFEMCloth;
 class NpPBDParticleSystem;
 class NpFLIPParticleSystem;
 class NpMPMParticleSystem;
-class NpCustomParticleSystem;
 class NpHairSystem;
 #endif
 
@@ -198,10 +197,6 @@ class PvdSceneClient : public PxPvdSceneClient, public PvdClient, public PvdVisu
 	void updatePvdProperties(const PxsMPMMaterialCore* materialCore);
 	void releasePvdInstance	(const PxsMPMMaterialCore* materialCore);
 
-	void createPvdInstance	(const PxsCustomMaterialCore* materialCore);
-	void updatePvdProperties(const PxsCustomMaterialCore* materialCore);
-	void releasePvdInstance	(const PxsCustomMaterialCore* materialCore);
-
 	///////////////////////////////////////////////////////////////////////////
 
 	void createPvdInstance			(const NpShape* shape, PxActor& owner);
@@ -248,12 +243,6 @@ class PvdSceneClient : public PxPvdSceneClient, public PvdClient, public PvdVisu
 	void attachAggregateActor(const NpMPMParticleSystem* particleSystem, NpActor* actor);
 	void detachAggregateActor(const NpMPMParticleSystem* particleSystem, NpActor* actor);
 	void releasePvdInstance(const NpMPMParticleSystem* particleSystem);
-
-	void createPvdInstance(const NpCustomParticleSystem* particleSystem);
-	void updatePvdProperties(const NpCustomParticleSystem* particleSystem);
-	void attachAggregateActor(const NpCustomParticleSystem* particleSystem, NpActor* actor);
-	void detachAggregateActor(const NpCustomParticleSystem* particleSystem, NpActor* actor);
-	void releasePvdInstance(const NpCustomParticleSystem* particleSystem);
 
 	void createPvdInstance(const NpHairSystem* hairSystem);
 	void updatePvdProperties(const NpHairSystem* hairSystem);

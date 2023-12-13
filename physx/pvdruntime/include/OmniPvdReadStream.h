@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -50,7 +50,7 @@ public:
 	 * @param nbrBytes The requested number of bytes to read
 	 * @return The actual number of bytes read
 	 */
-	virtual uint64_t OMNI_PVD_CALL readBytes(uint8_t* bytes, const uint64_t nbrBytes) = 0;
+	virtual uint64_t OMNI_PVD_CALL readBytes(uint8_t* bytes, uint64_t nbrBytes) = 0;
 
 	/**
 	 * @brief Skip n bytes from the shared memory buffer
@@ -58,7 +58,7 @@ public:
 	 * @param nbrBytes The requested number of bytes to skip
 	 * @return The actual number of bytes skipped
 	 */
-	virtual uint64_t OMNI_PVD_CALL skipBytes(const uint64_t nbrBytes) = 0;
+	virtual uint64_t OMNI_PVD_CALL skipBytes(uint64_t nbrBytes) = 0;
 	
 	/**
 	 * @brief Opens the read stream

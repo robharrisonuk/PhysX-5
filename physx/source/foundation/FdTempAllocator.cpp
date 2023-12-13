@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.
 
@@ -96,7 +96,7 @@ void* PxTempAllocator::allocate(size_t size, const char* filename, PxI32 line)
 
 	chunk->mIndex = index;
 	void* ret = chunk + 1;
-	PX_ASSERT((size_t(ret) & 0xf) == 0); // SDK types require at minimum 16 byte allignment.
+	PX_ASSERT((size_t(ret) & 0xf) == 0); // SDK types require at minimum 16 byte alignment.
 	return ret;
 }
 

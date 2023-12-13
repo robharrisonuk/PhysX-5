@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.
 
@@ -153,7 +153,7 @@ PX_C_EXPORT PX_FOUNDATION_API void PX_CALL_CONV PxSetFoundationInstance(physx::P
 
 \note The behavior of this method is undefined if the foundation instance has not been created already.
 
-@see PxCreateFoundation()
+@see PxCreateFoundation(), PxIsFoundationValid()
 */
 #if PX_CLANG
 #if PX_LINUX
@@ -167,6 +167,14 @@ PX_C_EXPORT PX_FOUNDATION_API physx::PxFoundation& PX_CALL_CONV PxGetFoundation(
 #pragma clang diagnostic pop
 #endif // PX_LINUX
 #endif // PX_CLANG
+
+/**
+\brief Similar to PxGetFoundation() except it handles the case if the foundation was not created already.
+\return Pointer to the foundation if an instance is currently available, otherwise null.
+
+@see PxCreateFoundation(), PxGetFoundation()
+*/
+PX_C_EXPORT PX_FOUNDATION_API physx::PxFoundation* PX_CALL_CONV PxIsFoundationValid();
 
 #if !PX_DOXYGEN
 namespace physx
@@ -197,7 +205,7 @@ PX_C_EXPORT PX_FOUNDATION_API physx::PxAllocatorCallback* PX_CALL_CONV PxGetAllo
 /**
 \brief Get the broadcasting allocator callback
 */
-PX_C_EXPORT PX_FOUNDATION_API physx::PxAllocatorCallback* PX_CALL_CONV PxGetBroadcastAllocator();
+PX_C_EXPORT PX_FOUNDATION_API physx::PxAllocatorCallback* PX_CALL_CONV PxGetBroadcastAllocator(bool* reportAllocationNames = NULL);
 
 /**
 \brief Get the error callback

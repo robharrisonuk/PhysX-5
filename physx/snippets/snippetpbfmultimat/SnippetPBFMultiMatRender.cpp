@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -118,11 +118,11 @@ void onBeforeRenderParticles()
 
 		PxScene* scene;
 		PxGetPhysics().getScenes(&scene, 1);
-		PxCudaContextManager* cudaContexManager = scene->getCudaContextManager();
+		PxCudaContextManager* cudaContextManager = scene->getCudaContextManager();
 
-		cudaContexManager->acquireContext();
+		cudaContextManager->acquireContext();
 
-		PxCudaContext* cudaContext = cudaContexManager->getCudaContext();
+		PxCudaContext* cudaContext = cudaContextManager->getCudaContext();
 		cudaContext->memcpyDtoH(sPosBufferH->begin(), CUdeviceptr(positions), sizeof(PxVec4) * numParticles);
 		cudaContext->memcpyDtoH(sVelBufferH->begin(), CUdeviceptr(vels), sizeof(PxVec4) * numParticles);
 		cudaContext->memcpyDtoH(sPhasesH->begin(), CUdeviceptr(phases), sizeof(PxU32) * numParticles);
@@ -130,7 +130,7 @@ void onBeforeRenderParticles()
 		copyVec4ToVec3(*sPosBuffer3H, *sPosBufferH);
 		mapVec4ToColor3(*sColorBuffer3H, *sVelBufferH, *sPhasesH);
 
-		cudaContexManager->releaseContext();
+		cudaContextManager->releaseContext();
 	}
 
 }
@@ -199,9 +199,6 @@ void cleanup()
 
 void exitCallback(void)
 {
-#if PX_WINDOWS
-		cleanup();
-#endif
 }
 }
 
@@ -217,8 +214,6 @@ void renderLoop()
 
 	glutMainLoop();
 
-#if PX_LINUX_FAMILY
 	cleanup();
-#endif
 }
 #endif

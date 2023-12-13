@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -52,7 +52,7 @@ namespace physx
 		PxsMaterialManagerT()
 		{
 			const PxU32 matCount = 128;
-			materials = reinterpret_cast<MaterialCore*>(physx::PxAlignedAllocator<16>().allocate(sizeof(MaterialCore)*matCount,  __FILE__, __LINE__));
+			materials = reinterpret_cast<MaterialCore*>(physx::PxAlignedAllocator<16>().allocate(sizeof(MaterialCore)*matCount,  PX_FL));
 			maxMaterials = matCount;
 			for(PxU32 i=0; i<matCount; ++i)
 			{
@@ -101,7 +101,7 @@ namespace physx
 			const PxU32 numMaterials = maxMaterials;
 			
 			maxMaterials = (minValueForMax+31)&~31;
-			MaterialCore* mat = reinterpret_cast<MaterialCore*>(physx::PxAlignedAllocator<16>().allocate(sizeof(MaterialCore)*maxMaterials,  __FILE__, __LINE__));
+			MaterialCore* mat = reinterpret_cast<MaterialCore*>(physx::PxAlignedAllocator<16>().allocate(sizeof(MaterialCore)*maxMaterials,  PX_FL));
 			for(PxU32 i=0; i<numMaterials; ++i)
 				mat[i] = materials[i];
 
@@ -143,10 +143,6 @@ namespace physx
 	};
 
 	class PxsMPMMaterialManager : public PxsMaterialManagerT<PxsMPMMaterialCore>
-	{
-	};
-
-	class PxsCustomMaterialManager : public PxsMaterialManagerT<PxsCustomMaterialCore>
 	{
 	};
 

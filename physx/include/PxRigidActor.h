@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -114,6 +114,9 @@ public:
 	\li moving actors into other actors, thus causing overlap (an invalid physical state)
 
 	\li moving an actor that is connected by a joint to another away from the other (thus causing joint error)
+
+	\note It is not allowed to use this method if the actor is part of a #PxPruningStructure that has not been
+	added to a scene yet.
 
 	<b>Sleeping:</b> This call wakes dynamic actors if they are sleeping and the autowake parameter is true (default).
 
@@ -224,7 +227,7 @@ protected:
 	PX_INLINE					PxRigidActor(PxType concreteType, PxBaseFlags baseFlags) : PxActor(concreteType, baseFlags) {}
 	PX_INLINE					PxRigidActor(PxBaseFlags baseFlags) : PxActor(baseFlags) {}
 	virtual						~PxRigidActor()	{}
-	virtual		bool			isKindOf(const char* name)	const	{	return !::strcmp("PxRigidActor", name) || PxActor::isKindOf(name); }
+	virtual		bool			isKindOf(const char* name)	const	{	PX_IS_KIND_OF(name, "PxRigidActor", PxActor); }
 };
 
 #if !PX_DOXYGEN

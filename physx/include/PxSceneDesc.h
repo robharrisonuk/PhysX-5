@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -56,9 +56,6 @@ namespace physx
 #PxFrictionType::ePATCH selects the patch friction model which typically leads to the most stable results at low solver iteration counts and is also quite inexpensive, as it uses only
 up to four scalar solver constraints per pair of touching objects.  The patch friction model is the same basic strong friction algorithm as PhysX 3.2 and before.  
 
-#PxFrictionType::eONE_DIRECTIONAL is a simplification of the Coulomb friction model, in which the friction for a given point of contact is applied in the alternating tangent directions of
-the contact's normal.  This simplification allows us to reduce the number of iterations required for convergence but is not as accurate as the two directional model.
-
 #PxFrictionType::eTWO_DIRECTIONAL is identical to the one directional model, but it applies friction in both tangent directions simultaneously.  This hurts convergence a bit so it 
 requires more solver iterations, but is more accurate.  Like the one directional model, it is applied at every contact point, which makes it potentially more expensive
 than patch friction for scenarios with many contact points.
@@ -70,7 +67,7 @@ struct PxFrictionType
 	enum Enum
 	{
 		ePATCH,				//!< Select default patch-friction model.
-		eONE_DIRECTIONAL,	//!< Select one directional per-contact friction model.
+		eONE_DIRECTIONAL PX_DEPRECATED, //!< @deprecated Please do not use any longer.
 		eTWO_DIRECTIONAL,	//!< Select two directional per-contact friction model.
 		eFRICTION_COUNT		//!< The total number of friction models supported by the SDK.
 	};
@@ -88,7 +85,7 @@ struct PxSolverType
 	enum Enum
 	{
 		ePGS,	//!< Projected Gauss-Seidel iterative solver
-		eTGS	//!< Default Temporal Gauss-Seidel solver
+		eTGS	//!< Temporal Gauss-Seidel solver
 	};
 };
 
@@ -279,17 +276,22 @@ struct PxSceneFlag
 		eENABLE_FRICTION_EVERY_ITERATION = (1 << 15),
 
 		/*
-		\brief Disables GPU readback of articulation data when running on GPU.
-		Useful if your application only needs to communicate to the GPU via GPU buffers. Can be significantly faster
-		*/
-		eSUPPRESS_READBACK = (1<<16),
+		\brief Enables the direct-GPU API. Raising this flag is only allowed if eENABLE_GPU_DYNAMICS is raised and 
+		PxBroadphaseType::eGPU is used.
 
-		/*
-		\brief Forces GPU readback of articulation data when user raise eSUPPRESS_READBACK.
-		*/
-		eFORCE_READBACK = (1 << 17),
+		This is useful if your application only needs to communicate to the GPU via GPU buffers. Can be significantly
+		faster.
+		
+		\note Enabling the direct-GPU API will disable the readback of simulation state from GPU to CPU. Simulation outputs
+		can only be accessed using the direct-GPU API functions in PxScene (PxScene::copyBodyData(), PxScene::copyArticulationData(),
+		PxScene::copySoftbodyData(), PxScene::copyContactData()), and reading state directly from the actor is not allowed.
 
-		eMUTABLE_FLAGS = eENABLE_ACTIVE_ACTORS|eEXCLUDE_KINEMATICS_FROM_ACTIVE_ACTORS|eSUPPRESS_READBACK
+		\note This flag is not mutable and must be set in PxSceneDesc at scene creation.
+
+		*/
+		eENABLE_DIRECT_GPU_API = (1 << 16),
+
+		eMUTABLE_FLAGS = eENABLE_ACTIVE_ACTORS|eEXCLUDE_KINEMATICS_FROM_ACTIVE_ACTORS
 	};
 };
 
@@ -375,7 +377,7 @@ PX_INLINE bool PxSceneLimits::isValid() const
 
 struct PxgDynamicsMemoryConfig
 {
-	PxU32 tempBufferCapacity;				//!< Capacity of temp buffer allocated in pinned host memory.
+	PxU32 tempBufferCapacity;				//!< Initial capacity of temp solver buffer allocated in pinned host memory. This buffer will grow if more memory is needed than specified here.
 	PxU32 maxRigidContactCount;				//!< Size of contact stream buffer allocated in pinned host memory. This is double-buffered so total allocation size = 2* contactStreamCapacity * sizeof(PxContact).
 	PxU32 maxRigidPatchCount;				//!< Size of the contact patch stream buffer allocated in pinned host memory. This is double-buffered so total allocation size = 2 * patchStreamCapacity * sizeof(PxContactPatch).
 	PxU32 heapCapacity;						//!< Initial capacity of the GPU and pinned host memory heaps. Additional memory will be allocated if more memory is required.
@@ -1021,7 +1023,7 @@ PX_INLINE bool PxSceneDesc::isValid() const
 	if(!gpuDynamicsConfig.isValid())
 		return false;
 
-	if (flags & PxSceneFlag::eSUPPRESS_READBACK)
+	if (flags & PxSceneFlag::eENABLE_DIRECT_GPU_API)
 	{
 		if(!(flags & PxSceneFlag::eENABLE_GPU_DYNAMICS && broadPhaseType == PxBroadPhaseType::eGPU))
 			return false;

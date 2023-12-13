@@ -22,7 +22,7 @@
 ## (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 ## OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ##
-## Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+## Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 
 #
 # Build LowLevel common
@@ -101,9 +101,7 @@ SET(LL_SOFTWARE_HEADERS
 	${LL_SOFTWARE_DIR}/include/PxsContactManager.h
 	${LL_SOFTWARE_DIR}/include/PxsContactManagerState.h
 	${LL_SOFTWARE_DIR}/include/PxsContext.h
-	${LL_SOFTWARE_DIR}/include/PxsDefaultMemoryManager.h
 	${LL_SOFTWARE_DIR}/include/PxsHeapMemoryAllocator.h
-	${LL_SOFTWARE_DIR}/include/PxsIncrementalConstraintPartitioning.h
 	${LL_SOFTWARE_DIR}/include/PxsIslandManagerTypes.h
 	${LL_SOFTWARE_DIR}/include/PxsIslandSim.h
 	${LL_SOFTWARE_DIR}/include/PxsKernelWrangler.h
@@ -193,14 +191,12 @@ SET_TARGET_PROPERTIES(LowLevel PROPERTIES
 )
 
 
-IF(NV_USE_GAMEWORKS_OUTPUT_DIRS)	
-	SET_TARGET_PROPERTIES(LowLevel PROPERTIES 
-		ARCHIVE_OUTPUT_NAME_DEBUG "LowLevel_static"
-		ARCHIVE_OUTPUT_NAME_CHECKED "LowLevel_static"
-		ARCHIVE_OUTPUT_NAME_PROFILE "LowLevel_static"
-		ARCHIVE_OUTPUT_NAME_RELEASE "LowLevel_static"
-	)
-ENDIF()
+SET_TARGET_PROPERTIES(LowLevel PROPERTIES 
+    ARCHIVE_OUTPUT_NAME_DEBUG "LowLevel_static"
+    ARCHIVE_OUTPUT_NAME_CHECKED "LowLevel_static"
+    ARCHIVE_OUTPUT_NAME_PROFILE "LowLevel_static"
+    ARCHIVE_OUTPUT_NAME_RELEASE "LowLevel_static"
+)
 
 IF(LL_COMPILE_PDB_NAME_DEBUG)
 	SET_TARGET_PROPERTIES(LowLevel PROPERTIES 

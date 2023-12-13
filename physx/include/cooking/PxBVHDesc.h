@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.
 
@@ -130,11 +130,6 @@ PX_INLINE bool PxBVHDesc::isValid() const
 
 	return true;
 }
-
-	/**
-	 * @deprecated
-	 */
-	typedef PX_DEPRECATED PxBVHDesc PxBVHStructureDesc;
 
 #if !PX_DOXYGEN
 } // namespace physx

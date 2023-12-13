@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -70,8 +70,7 @@ static PX_FORCE_INLINE const PxU16* getMaterialIndicesLL(const PxTriangleMeshGeo
 
 static void PxcGetMaterialMesh(const PxsShapeCore* shape, const PxU32 index, PxcNpThreadContext& context, PxsMaterialInfo* materialInfo)
 {
-	PX_ASSERT(index == 1);
-	PX_UNUSED(index);
+	PX_ASSERT(index == 0 || index == 1);
 	const PxTriangleMeshGeometryLL& shapeMesh = shape->mGeometry.get<const PxTriangleMeshGeometryLL>();
 	if(shapeMesh.materialsLL.numIndices <= 1)
 	{
@@ -86,7 +85,7 @@ static void PxcGetMaterialMesh(const PxsShapeCore* shape, const PxU32 index, Pxc
 		for(PxU32 i=0; i<count; i++)
 		{
 			PxContactPoint& contact = contactBuffer.contacts[i];
-			const PxU32 localMaterialIndex = eaMaterialIndices[contact.internalFaceIndex1];//shapeMesh.triangleMesh->getTriangleMaterialIndex(contact.featureIndex1);
+			const PxU32 localMaterialIndex = eaMaterialIndices ? eaMaterialIndices[contact.internalFaceIndex1] : 0;//shapeMesh.triangleMesh->getTriangleMaterialIndex(contact.featureIndex1);
 			(&materialInfo[i].mMaterialIndex0)[index] = indices[localMaterialIndex];
 		}
 	}
@@ -111,7 +110,7 @@ static void PxcGetMaterialShapeMesh(const PxsShapeCore* shape0, const PxsShapeCo
 			PxContactPoint& contact = contactBuffer.contacts[i];
 			materialInfo[i].mMaterialIndex0 = materialIndex0;
 
-			const PxU32 localMaterialIndex = eaMaterialIndices[contact.internalFaceIndex1];//shapeMesh.triangleMesh->getTriangleMaterialIndex(contact.featureIndex1);
+			const PxU32 localMaterialIndex = eaMaterialIndices ? eaMaterialIndices[contact.internalFaceIndex1] : 0;//shapeMesh.triangleMesh->getTriangleMaterialIndex(contact.featureIndex1);
 			materialInfo[i].mMaterialIndex1 = indices[localMaterialIndex];
 		}
 	}
@@ -137,7 +136,7 @@ static void PxcGetMaterialSoftBodyMesh(const PxsShapeCore* shape0, const PxsShap
 			PxContactPoint& contact = contactBuffer.contacts[i];
 			materialInfo[i].mMaterialIndex0 = materialIndex0;
 
-			const PxU32 localMaterialIndex = eaMaterialIndices[contact.internalFaceIndex1];//shapeMesh.triangleMesh->getTriangleMaterialIndex(contact.featureIndex1);
+			const PxU32 localMaterialIndex = eaMaterialIndices ? eaMaterialIndices[contact.internalFaceIndex1] : 0;//shapeMesh.triangleMesh->getTriangleMaterialIndex(contact.featureIndex1);
 																						   //contact.featureIndex1 = shapeMesh.materials.indices[localMaterialIndex];
 			materialInfo[i].mMaterialIndex1 = indices[localMaterialIndex];
 		}
@@ -158,8 +157,7 @@ static PxU32 GetMaterialIndex(const Gu::HeightFieldData* hfData, PxU32 triangleI
 
 static void PxcGetMaterialHeightField(const PxsShapeCore* shape, const PxU32 index, PxcNpThreadContext& context, PxsMaterialInfo* materialInfo)
 {
-	PX_ASSERT(index == 1);
-	PX_UNUSED(index);
+	PX_ASSERT(index == 0 || index == 1);
 	const PxHeightFieldGeometryLL& hfGeom = shape->mGeometry.get<const PxHeightFieldGeometryLL>();
 	if(hfGeom.materialsLL.numIndices <= 1)
 	{

@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2023 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -54,11 +54,12 @@
 #include "NpActor.h"
 #include "NpActorTemplate.h"
 #include "NpBase.h"
+#include "NpMaterialManager.h"
+#include "NpPhysics.h"
 
 #include "ScParticleSystemSim.h"
 
 #if PX_ENABLE_FEATURES_UNDER_CONSTRUCTION
-#include "PxCustomParticleSystem.h"
 #include "PxFLIPParticleSystem.h"
 #include "PxFLIPMaterial.h"
 #include "PxMPMParticleSystem.h"
@@ -108,7 +109,7 @@ namespace physx
 
 			if (!NpBase::getNpScene())
 			{
-				PxGetFoundation().error(PxErrorCode::eINVALID_OPERATION, __FILE__, __LINE__, "Querying bounds of a PxParticleSystem which is not part of a PxScene is not supported.");
+				PxGetFoundation().error(PxErrorCode::eINVALID_OPERATION, PX_FL, "Querying bounds of a PxParticleSystem which is not part of a PxScene is not supported.");
 				return PxBounds3::empty();
 			}
 
@@ -194,12 +195,15 @@ namespace physx
 				flags.raise(flag);
 			else
 				flags.clear(flag);
+
 			mCore.setFlags(flags);
+			scSetDirtyFlag();
 		}
 
 		virtual	void				setParticleFlags(PxParticleFlags flags)
 		{
 			mCore.setFlags(flags);
+			scSetDirtyFlag();
 		}
 
 		virtual	PxParticleFlags		getParticleFlags() const
@@ -211,24 +215,14 @@ namespace physx
 		void						setSolverType(const PxParticleSolverType::Enum solverType) { scSetSolverType(solverType); }
 		virtual PxParticleSolverType::Enum	getSolverType() const { return mCore.getSolverType(); }
 
-
-		virtual PxU32				getNbParticleMaterials() const
+		virtual PxU32 getNbParticleMaterials() const 
 		{
 			const Sc::ParticleSystemShapeCore& shapeCore = mCore.getShapeCore();
-			return shapeCore.getNbMaterialIndices();
+			const Dy::ParticleSystemCore& core = shapeCore.getLLCore();
+			return core.mUniqueMaterialHandles.size();
 		}
 
-		virtual void setPeriodicBoundary(const PxVec3& boundary)
-		{
-			mCore.setPeriodicBoundary(boundary);
-			scSetDirtyFlag();
-		}
-
-		
-		virtual PxVec3 getPeriodicBoundary() const
-		{
-			return mCore.getPeriodicBoundary();
-		}
+		virtual PxU32 getParticleMaterials(PxParticleMaterial** userBuffer, PxU32 bufferSize, PxU32 startIndex = 0) const = 0;
 
 		virtual void addParticleBuffer(PxParticleBuffer* userBuffer) = 0;
 		virtual void removeParticleBuffer(PxParticleBuffer* userBuffer) = 0;
@@ -238,7 +232,7 @@ namespace physx
 			NP_READ_CHECK(NpBase::getNpScene());
 			PX_CHECK_AND_RETURN_VAL(NpBase::getNpScene(), "NpParticleSystem::getGpuParticleSystemIndex: particle system must be in a scene.", 0xffffffff);
 
-			if (NpBase::getNpScene()->getFlags() & PxSceneFlag::eSUPPRESS_READBACK)
+			if (NpBase::getNpScene()->getFlags() & PxSceneFlag::eENABLE_DIRECT_GPU_API)
 				return mCore.getSim()->getLowLevelParticleSystem()->getGpuRemapId();
 			return 0xffffffff;
 		}
@@ -400,6 +394,27 @@ namespace physx
 		virtual	void				setGridSizeY(PxU32 gridSizeY) { scSetGridSizeY(gridSizeY); }
 		virtual	void				setGridSizeZ(PxU32 gridSizeZ) { scSetGridSizeZ(gridSizeZ); }
 
+		template<typename ParticleMaterialType>
+		PxU32 getParticleMaterialsInternal(PxParticleMaterial** userBuffer, PxU32 bufferSize,
+	                                       PxU32 startIndex = 0) const
+	    {
+		    const Sc::ParticleSystemShapeCore& shapeCore = mCore.getShapeCore();
+		    const Dy::ParticleSystemCore& core = shapeCore.getLLCore();
+
+		    NpMaterialManager<ParticleMaterialType>& matManager =
+		        NpMaterialAccessor<ParticleMaterialType>::getMaterialManager(NpPhysics::getInstance());
+
+		    PxU32 size = core.mUniqueMaterialHandles.size();
+		    const PxU32 remainder = PxU32(PxMax<PxI32>(PxI32(size - startIndex), 0));
+		    const PxU32 writeCount = PxMin(remainder, bufferSize);
+		    for(PxU32 i = 0; i < writeCount; i++)
+		    {
+			    userBuffer[i] = matManager.getMaterial(core.mUniqueMaterialHandles[startIndex + i]);
+		    }
+		    return writeCount;
+	    }
+
+
 	protected:
 		Sc::ParticleSystemCore		mCore;
 		PxCudaContextManager*		mCudaContextManager;
@@ -472,6 +487,8 @@ namespace physx
 		//external API
 		virtual PxActorType::Enum	getType() const { return PxActorType::ePBD_PARTICLESYSTEM; }
 
+		virtual PxU32				getParticleMaterials(PxParticleMaterial** userBuffer, PxU32 bufferSize, PxU32 startIndex) const PX_OVERRIDE;
+
 		virtual void				addParticleBuffer(PxParticleBuffer* particleBuffer);
 		virtual void				removeParticleBuffer(PxParticleBuffer* particleBuffer);
 
@@ -515,8 +532,10 @@ namespace physx
 		virtual void				visualize(PxRenderOutput& out, NpScene& npScene)	const;
 #else
 		PX_CATCH_UNDEFINED_ENABLE_DEBUG_VISUALIZATION
-#endif	
-		
+#endif
+
+		virtual PxU32				getParticleMaterials(PxParticleMaterial** userBuffer, PxU32 bufferSize, PxU32 startIndex) const PX_OVERRIDE;
+
 		virtual void				addParticleBuffer(PxParticleBuffer* particleBuffer);
 		virtual void				removeParticleBuffer(PxParticleBuffer* particleBuffer);
 
@@ -568,6 +587,8 @@ namespace physx
 		PX_CATCH_UNDEFINED_ENABLE_DEBUG_VISUALIZATION
 #endif	
 
+		virtual PxU32				getParticleMaterials(PxParticleMaterial** userBuffer, PxU32 bufferSize, PxU32 startIndex) const PX_OVERRIDE;
+
 		virtual void				addParticleBuffer(PxParticleBuffer* particleBuffer);
 		virtual void				removeParticleBuffer(PxParticleBuffer* particleBuffer);
 
@@ -583,46 +604,6 @@ namespace physx
 			mCore.setMPMParams(params);
 			//UPDATE_PVD_PROPERTY
 		}
-	};
-
-	class NpCustomParticleSystem : public NpParticleSystem<PxCustomParticleSystem>
-	{
-	public:
-
-		NpCustomParticleSystem(PxCudaContextManager& contextManager, PxU32 maxNeighborhood);
-
-		virtual						~NpCustomParticleSystem() {}
-
-		virtual void				release();
-
-		
-
-		virtual void				setSparseGridParams(const PxSparseGridParams& params) { scSetSparseGridParams(params); }
-		virtual PxSparseGridParams	getSparseGridParams() const { return mCore.getSparseGridParams(); }
-
-		virtual void*				getSparseGridDataPointer(PxSparseGridDataFlag::Enum flags);
-
-		virtual void				getSparseGridCoord(PxI32& x, PxI32& y, PxI32& z, PxU32 id);
-
-		virtual	PxU32				createPhase(PxParticleMaterial* material, PxParticlePhaseFlags flags) PX_OVERRIDE;
-
-#if PX_ENABLE_DEBUG_VISUALIZATION
-		virtual void				visualize(PxRenderOutput& out, NpScene& npScene)	const;
-#else
-		PX_CATCH_UNDEFINED_ENABLE_DEBUG_VISUALIZATION
-#endif	
-
-		virtual void				addParticleBuffer(PxParticleBuffer* particleBuffer);
-		virtual void				removeParticleBuffer(PxParticleBuffer* particleBuffer);
-
-		virtual void				addRigidAttachment(PxRigidActor* /*actor*/) {}
-		virtual void				removeRigidAttachment(PxRigidActor* /*actor*/) {}
-
-		//external API
-		virtual						PxActorType::Enum	getType() const { return PxActorType::eCUSTOM_PARTICLESYSTEM; }
-
-		virtual void						setCustomParticleCallback(PxCustomParticleSystemSolverCallback* callback);
-		virtual PxCustomParticleSystemSolverCallback* getCustomParticleCallback() const;
 	};
 #endif
 
